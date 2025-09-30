@@ -23,6 +23,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            print("Successfully logged in")
             return redirect('home')
     else:
         form = AuthenticationForm()
@@ -31,7 +32,7 @@ def login_view(request):
 # Логаут
 def logout_view(request):
     logout(request)
-    messages("Вы вышли из системы")
+    print("Вы вышли из системы")
     return redirect('login')
 
 def home_view(request):
