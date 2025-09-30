@@ -74,8 +74,12 @@ WSGI_APPLICATION = 'afina.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  # движок для PostgreSQL
+        'NAME': 'afina',       # имя базы данных
+        'USER': 'postgres',   # имя пользователя PostgreSQL
+        'PASSWORD': '123',  # пароль пользователя
+        'HOST': 'localhost',  # хост сервера БД
+        'PORT': '5432',       # порт PostgreSQL
     }
 }
 
