@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import RegisterForm
 
-# Регистрация
+# Регистрация dima peredelai
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
