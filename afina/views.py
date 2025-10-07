@@ -5,6 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .forms import RegisterForm
 
 # Регистрация dima peredelai
+# metodi bystroy razrabotki
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
