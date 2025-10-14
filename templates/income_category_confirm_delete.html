@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Удалить категорию</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+        .actions { margin-top: 16px; display: flex; gap: 8px; }
+        button, a.button { background: #dc2626; color: #fff; padding: 8px 12px; border-radius: 6px; text-decoration: none; border: none; cursor: pointer; }
+        a.button { background: #6b7280; }
+    </style>
+</head>
+<body>
+<h1>Удалить категорию</h1>
+<p>Вы уверены, что хотите удалить категорию: <strong>{{ category.incomeName }}</strong>?</p>
+<form method="post">
+    {% csrf_token %}
+    <div class="actions">
+        <button type="submit">Удалить</button>
+        <a class="button" href="{% url 'income_category_list' %}">Отмена</a>
+    </div>
+</form>
+</body>
+</html>
