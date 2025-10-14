@@ -1,8 +1,10 @@
+
 from django.contrib.messages.context_processors import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegisterForm
+from .forms import RegisterForm, IncomeCategoryForm
+from .models import IncomeCategory
 
 # Регистрация dima peredelai
 # metodi bystroy razrabotki
@@ -38,3 +40,38 @@ def logout_view(request):
 
 def home_view(request):
     return render(request, 'home.html')
+
+# -------------------------
+# IncomeCategory CRUD views
+# -------------------------
+def income_category_list(request):
+    categories = IncomeCategory.objects.all().order_by('incomeName')
+    return render(request, 'income_category_list.html', {'categories': categories})
+
+def income_category_create(request):
+    if request.method == 'POST':
+        form = IncomeCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('income_category_list')
+    else:
+        form = IncomeCategoryForm()
+    return render(request, 'income_category_form.html', {'form': form, 'title': 'Добавить категорию'})
+
+def income_category_update(request, pk):
+    category = get_object_or_404(IncomeCategory, pk=pk)
+    if request.method == 'POST':
+        form = IncomeCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('income_category_list')
+    else:
+        form = IncomeCategoryForm(instance=category)
+    return render(request, 'income_category_form.html', {'form': form, 'title': 'Изменить категорию'})
+
+def income_category_delete(request, pk):
+    category = get_object_or_404(IncomeCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        return redirect('income_category_list')
+    return render(request, 'income_category_confirm_delete.html', {'category': category})
