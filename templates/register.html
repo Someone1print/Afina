@@ -1,5 +1,19 @@
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Регистрация</button>
-</form>
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="text-center mb-4">Регистрация</h2>
+
+<div class="mx-auto" style="max-width: 450px;">
+  <form method="post" class="border p-4 rounded">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success w-100">Создать аккаунт</button>
+  </form>
+
+  <p class="text-center mt-3">
+    Уже есть аккаунт?
+    <a href="{% url 'login' %}">Войти</a>
+  </p>
+</div>
+
+{% endblock %}

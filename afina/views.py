@@ -8,6 +8,7 @@ from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
 from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm)
 from django.contrib.auth.decorators import login_required
 
+
 # Регистрация
 # metodi bystroy razrabotki
 def register_view(request):
