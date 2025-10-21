@@ -9,6 +9,7 @@ class IncomeCategory(models.Model):
     class Meta:
         db_table = 'income_category'  # имя твоей существующей таблицы
 
+
     class Profile(models.Model):
         user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
         full_name = models.CharField("ФИО", max_length=150, blank=True)
@@ -23,3 +24,20 @@ class IncomeCategory(models.Model):
 
         def _str_(self):
             return self.full_name or self.user.username
+
+class Income(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='incomes')
+    category = models.ForeignKey(IncomeCategory, on_delete=models.PROTECT, related_name='incomes')
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    note = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = 'income'
+        ordering = ['-date', '-id']
+        verbose_name = "Доход"
+        verbose_name_plural = "Доходы"
+
+    def _str_(self):
+        return f"{self.date}: {self.amount} ({self.category})"
+
