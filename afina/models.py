@@ -8,3 +8,18 @@ class IncomeCategory(models.Model):
 
     class Meta:
         db_table = 'income_category'  # имя твоей существующей таблицы
+
+    class ExpenseCategory(models.Model):
+        id = models.AutoField(primary_key=True)
+        expenseName = models.CharField(max_length=100, unique=True)
+
+        class Meta:
+            db_table = 'expense_category'
+            ordering = ['expenseName']
+            verbose_name = "Категория расхода"
+            verbose_name_plural = "Категории расходов"
+
+        def _str_(self):
+            return self.expenseName
+
+
