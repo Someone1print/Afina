@@ -32,5 +32,26 @@ urlpatterns = [
     path('income-categories/add/', views.income_category_create, name='income_category_create'),
     path('income-categories/<int:pk>/edit/', views.income_category_update, name='income_category_update'),
     path('income-categories/<int:pk>/delete/', views.income_category_delete, name='income_category_delete'),
+# ExpenseCategory
+    path('expense-categories/', views.expense_category_list, name='expense_category_list'),
+    path('expense-categories/create/', views.expense_category_create, name='expense_category_create'),
+    path('expense-categories/<int:pk>/edit/', views.expense_category_update, name='expense_category_update'),
+    path('expense-categories/<int:pk>/delete/', views.expense_category_delete, name='expense_category_delete'),
+
+    # Incomes
+    path('incomes/', views.income_list, name='income_list'),
+    path('incomes/create/', views.income_create, name='income_create'),
+    path('incomes/<int:pk>/edit/', views.income_update, name='income_update'),
+    path('incomes/<int:pk>/delete/', views.income_delete, name='income_delete'),
+
+    # Expenses
+    path('expenses/', views.expense_list, name='expense_list'),
+    path('expenses/create/', views.expense_create, name='expense_create'),
+    path('expenses/<int:pk>/edit/', views.expense_update, name='expense_update'),
+    path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
+
+    # Profile
+    path('profile/', views.profile_view, name='profile_view'),
+    path('profile/edit/', views.profile_edit, name='profile_edit'),
 ]
 

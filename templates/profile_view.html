@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Профиль</h2>
+
+<p><strong>Пользователь:</strong> {{ request.user.username }}</p>
+<p><strong>ФИО:</strong> {{ profile.full_name }}</p>
+<p><strong>Валюта по умолчанию:</strong> {{ profile.currency }}</p>
+
+<a href="{% url 'profile_edit' %}" class="btn btn-primary">Редактировать</a>
+{% endblock %}
