@@ -5,8 +5,8 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import RegisterForm
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
-from .forms import (IncomeCategoryForm, ExpenseCategoryForm,
-                    IncomeForm, ExpenseForm, ProfileForm)
+from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm)
+from django.contrib.auth.decorators import login_required
 
 # Регистрация
 # metodi bystroy razrabotki
@@ -159,3 +159,61 @@ def income_delete(request, pk):
         item.delete()
         return redirect('income_list')
     return render(request, 'income_confirm_delete.html', {'item': item})
+
+# -------- Expense CRUD --------
+@login_required
+def expense_list(request):
+    items = Expense.objects.filter(user=request.user).select_related('category').order_by('-date','-id')
+    return render(request, 'expense_list.html', {'items': items})
+
+@login_required
+def expense_create(request):
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.user = request.user
+            obj.save()
+            return redirect('expense_list')
+    else:
+        form = ExpenseForm()
+    return render(request, 'expense_form.html', {'form': form, 'title': 'Добавить расход'})
+
+@login_required
+def expense_update(request, pk):
+    item = get_object_or_404(Expense, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect('expense_list')
+    else:
+        form = ExpenseForm(instance=item)
+    return render(request, 'expense_form.html', {'form': form, 'title': 'Изменить расход'})
+
+@login_required
+def expense_delete(request, pk):
+    item = get_object_or_404(Expense, pk=pk, user=request.user)
+    if request.method == 'POST':
+        item.delete()
+        return redirect('expense_list')
+    return render(request, 'expense_confirm_delete.html', {'item': item})
+
+
+# -------- Profile (просмотр/редактирование) --------
+@login_required
+def profile_view(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    return render(request, 'profile_view.html', {'profile': profile})
+
+@login_required
+def profile_edit(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile_view')
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'profile_form.html', {'form': form, 'title': 'Профиль'})
