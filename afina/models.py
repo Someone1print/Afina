@@ -41,3 +41,19 @@ class Income(models.Model):
     def _str_(self):
         return f"{self.date}: {self.amount} ({self.category})"
 
+
+class Expense(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
+    category = models.ForeignKey(ExpenseCategory, on_delete=models.PROTECT, related_name='expenses')
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    note = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = 'expense'
+        ordering = ['-date', '-id']
+        verbose_name = "Расход"
+        verbose_name_plural = "Расходы"
+
+    def _str_(self):
+        return f"{self.date}: {self.amount} ({self.category})"
