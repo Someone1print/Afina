@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .forms import RegisterForm, IncomeCategoryForm
 from .models import IncomeCategory
 
-# Регистрация dima peredelai
+# Регистрация
 # metodi bystroy razrabotki
 def register_view(request):
     if request.method == 'POST':
