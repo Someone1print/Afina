@@ -218,3 +218,20 @@ def profile_edit(request):
     else:
         form = ProfileForm(instance=profile)
     return render(request, 'profile_form.html', {'form': form, 'title': 'Профиль'})
+
+from django.contrib import messages
+
+@login_required(login_url='login')
+def expense_category_create(request):
+    if request.method == 'POST':
+        form = ExpenseCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Категория успешно добавлена!')
+            return redirect('expense_category_list')
+        else:
+            messages.error(request, 'Ошибка при добавлении категории. Попробуйте снова.')
+    else:
+        form = ExpenseCategoryForm()
+    return render(request, 'expense_category_form.html', {'form': form, 'title': 'Добавить категорию'})
+
