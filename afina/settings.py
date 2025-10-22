@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',  # движок для PostgreSQL
         'NAME': 'afina',       # имя базы данных
         'USER': 'postgres',   # имя пользователя PostgreSQL
-        'PASSWORD': '123',  # пароль пользователя
+        'PASSWORD': '4404',  # пароль пользователя
         'HOST': 'localhost',  # хост сервера БД
         'PORT': '5432',       # порт PostgreSQL
     }
@@ -120,9 +120,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'afina/static'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
