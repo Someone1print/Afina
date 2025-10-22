@@ -1,4 +1,3 @@
-```
 # finance/models.py
 from django.db import models
 from django.contrib.auth.models import User
@@ -86,4 +85,3 @@ class Expense(models.Model):
 
     def _str_(self):
         return f"{self.date}: {self.amount} ({self.category})"
-```
