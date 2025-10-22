@@ -35,7 +35,7 @@ share/python-wheels/
 db.sqlite3
 *.sqlite3
 local_settings.py
-settings.py
+afina/settings.py
 staticfiles/
 media/
 
@@ -64,7 +64,7 @@ dmypy.json
 .idea/
 .vscode/
 *.iml
-misx.xml
+.idea/misx.xml
 
 # OS / Misc
 .DS_Store
