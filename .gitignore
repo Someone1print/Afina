@@ -64,7 +64,7 @@ dmypy.json
 .idea/
 .vscode/
 *.iml
-.idea/misx.xml
+.idea/misc.xml
 
 # OS / Misc
 .DS_Store
