@@ -1,9 +1,34 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>{{ title }}</h2>
-<form method="post">
+
+<form method="post" novalidate>
   {% csrf_token %}
-  {{ form.as_p }}
+
+  <div class="mb-3">
+    <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
+    {{ form.category }}
+    {{ form.category.errors }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.date.id_for_label }}" class="form-label">Дата</label>
+    {{ form.date }}
+    {{ form.date.errors }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.amount.id_for_label }}" class="form-label">Сумма</label>
+    {{ form.amount }}
+    {{ form.amount.errors }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.note.id_for_label }}" class="form-label">Комментарий</label>
+    {{ form.note }}
+    {{ form.note.errors }}
+  </div>
+
   <button type="submit" class="btn btn-success">Сохранить</button>
   <a href="{% url 'income_list' %}" class="btn btn-secondary">Назад</a>
 </form>

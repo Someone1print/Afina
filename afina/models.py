@@ -10,6 +10,10 @@ class IncomeCategory(models.Model):
         db_table = 'income_category'  # имя твоей существующей таблицы
 
 
+    def __str__(self):
+        return self.incomeName  # ← теперь в select будут имена
+
+
 class ExpenseCategory(models.Model):
     id = models.AutoField(primary_key=True)
     expenseName = models.CharField(max_length=100, unique=True)
