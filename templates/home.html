@@ -215,16 +215,19 @@
 <body>
     <header>
         <nav>
-            <div class="logo">AFINA</div>
-            <ul class="nav-links">
-                <li><a href="{% url 'home' %}">Главная</a></li>
-                <li><a href="{% url 'income_category_list' %}">Категории</a></li>
-                <li><a href="#">Копилка</a></li>
-                <li><a href="#">Подписка</a></li>
-                <li><a href="#">Статистика</a></li>
-            </ul>
+        <div class="logo">
+            <a href="{% url 'home' %}" style="text-decoration: none; color: #223d77;">AFINA</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{% url 'home' %}">Главная</a></li>
+            <li><a href="{% url 'income_category_list' %}">Категории</a></li>
+            <li><a href="#">Копилка</a></li>
+            <li><a href="#">Подписка</a></li>
+            <li><a href="#">Статистика</a></li>
+        </ul>
         </nav>
     </header>
+
 
     <section class="hero">
         <div class="hero-content">
