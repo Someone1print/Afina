@@ -44,13 +44,20 @@
             color: #223d77;
         }
 
+        .logo a {
+            text-decoration: none;
+            color: #223d77;
+        }
+
         .nav-links {
             display: flex;
             list-style: none;
+            position: relative;
         }
 
         .nav-links li {
             margin-left: 30px;
+            position: relative;
         }
 
         .nav-links a {
@@ -58,10 +65,52 @@
             color: #333;
             font-weight: 500;
             transition: color 0.3s;
+            padding: 10px 0;
+            display: block;
         }
 
         .nav-links a:hover {
             color: #e2d4bb;
+        }
+
+        /* Стили для выпадающего меню */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 10px 0;
+            top: 100%;
+            left: 0;
+            z-index: 1001;
+        }
+
+        .dropdown-content a {
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f8f9fa;
+            color: #223d77;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
         .hero {
@@ -171,7 +220,7 @@
             width: 60px;
             height: 60px;
             margin-bottom: 20px;
-            object-fit: contain; /* Сохраняет пропорции изображения */
+            object-fit: contain;
         }
 
         .card h3 {
@@ -215,19 +264,24 @@
 <body>
     <header>
         <nav>
-        <div class="logo">
-            <a href="{% url 'home' %}" style="text-decoration: none; color: #223d77;">AFINA</a>
-        </div>
-        <ul class="nav-links">
-            <li><a href="{% url 'home' %}">Главная</a></li>
-            <li><a href="{% url 'income_category_list' %}">Категории</a></li>
-            <li><a href="#">Копилка</a></li>
-            <li><a href="#">Подписка</a></li>
-            <li><a href="#">Статистика</a></li>
-        </ul>
+            <div class="logo">
+                <a href="{% url 'home' %}" style="text-decoration: none; color: #223d77;">AFINA</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Главная</a></li>
+                <li class="dropdown">
+                    <a href="#">Категории</a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'income_category_list' %}">Категории доходов</a>
+                        <a href="{% url 'expense_category_list' %}">Категории расходов</a>
+                    </div>
+                </li>
+                <li><a href="#">Копилка</a></li>
+                <li><a href="#">Подписка</a></li>
+                <li><a href="#">Статистика</a></li>
+            </ul>
         </nav>
     </header>
-
 
     <section class="hero">
         <div class="hero-content">
@@ -244,19 +298,16 @@
         <h2>Наши преимущества</h2>
         <div class="feature-cards">
             <div class="card">
-
                 <img src="{% static 'afina/images/icon1.png' %}" alt="Управление доходами">
                 <h3>Управление доходами</h3>
                 <p>Легко отслеживайте и категоризируйте все ваши источники дохода.</p>
             </div>
             <div class="card">
-
                 <img src="{% static 'afina/images/icon2.png' %}" alt="Аналитика расходов">
                 <h3>Аналитика расходов</h3>
                 <p>Получайте детальные отчеты о ваших тратах и находите возможности для экономии.</p>
             </div>
             <div class="card">
-
                 <img src="{% static 'afina/images/icon3.png' %}" alt="Финансовые цели">
                 <h3>Финансовые цели</h3>
                 <p>Ставьте цели и отслеживайте прогресс их достижения.</p>
