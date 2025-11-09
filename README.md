@@ -9,7 +9,7 @@ The project uses `afina/local_settings.py` for database settings. This file is t
 
 **After cloning the repository:**
 1. Install the git hooks by running:
-   - **Windows (PowerShell):** `.\scripts\setup-hooks.ps1`
+   - **Windows (Git Bash):** `.\scripts\setup-hooks.sh`
    - **Linux/Mac:** `bash scripts/setup-hooks.sh`
 2. The `local_settings.py` file will be available in your working directory
 3. Modify `local_settings.py` with your local database credentials as needed
