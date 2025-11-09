@@ -34,9 +34,7 @@ share/python-wheels/
 *.log
 db.sqlite3
 *.sqlite3
-local_settings.py
-afina/local_settings.py
-afina/settings.py
+# afina/local_settings.py - kept in git but protected from commits via pre-commit hook
 staticfiles/
 media/
 
