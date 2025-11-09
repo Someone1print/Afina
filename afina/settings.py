@@ -71,21 +71,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'afina.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # движок для PostgreSQL
-        'NAME': 'afina',       # имя базы данных
-        'USER': 'postgres',   # имя пользователя PostgreSQL
-        'PASSWORD': '4404',  # пароль пользователя
-        'HOST': 'localhost',  # хост сервера БД
-        'PORT': '5432',       # порт PostgreSQL
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -129,4 +114,9 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
 
