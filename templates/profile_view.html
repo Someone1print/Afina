@@ -1,10 +1,40 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Профиль — AFINA{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/Profile.css' %}">
+{% endblock %}
+
 {% block content %}
-<h2>Профиль</h2>
+<section class="p-card">
+  <div class="p-head">
+    <div class="p-avatar">{{ request.user.username|first|upper }}</div>
+    <div>
+      <h1>Профиль</h1>
+      <p class="p-sub">Вы вошли как <strong>{{ request.user.username }}</strong></p>
+    </div>
+  </div>
 
-<p><strong>Пользователь:</strong> {{ request.user.username }}</p>
-<p><strong>ФИО:</strong> {{ profile.full_name }}</p>
-<p><strong>Валюта по умолчанию:</strong> {{ profile.currency }}</p>
+  <div class="p-grid">
+    <div class="p-item">
+      <div class="p-key">Пользователь</div>
+      <div class="p-val">{{ request.user.username }}</div>
+    </div>
 
-<a href="{% url 'profile_edit' %}" class="btn btn-primary">Редактировать</a>
+    <div class="p-item">
+      <div class="p-key">ФИО</div>
+      <div class="p-val">{{ profile.full_name|default:"—" }}</div>
+    </div>
+
+    <div class="p-item">
+      <div class="p-key">Валюта по умолчанию</div>
+      <div class="p-val"><span class="p-badge">{{ profile.currency }}</span></div>
+    </div>
+  </div>
+
+  <div class="p-actions">
+    <a href="{% url 'profile_edit' %}" class="btn btn-primary">Редактировать</a>
+  </div>
+</section>
 {% endblock %}

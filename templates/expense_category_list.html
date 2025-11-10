@@ -1,42 +1,59 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Категории расходов — AFINA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/Expense_Category.css' %}">
+{% endblock %}
+
 {% block content %}
-<header>
-    <nav>
-        <div class="logo">
-            <a href="{% url 'home' %}" style="text-decoration: none; color: #223d77;">AFINA</a>
-        </div>
-        <ul class="nav-links">
-            <li><a href="{% url 'home' %}">Главная</a></li>
-            <li><a href="{% url 'income_category_list' %}">Категории доходов</a></li>
-            <li><a href="{% url 'expense_category_list' %}">Категории расходов</a></li>
-            <li><a href="#">Копилка</a></li>
-            <li><a href="#">Подписка</a></li>
-            <li><a href="#">Статистика</a></li>
-        </ul>
-    </nav>
-</header>
 
-<h2>Категории расходов</h2>
+<section class="page-head container">
+  <div class="page-head__left">
+    <h1 class="page-title">Категории расходов</h1>
+    <span class="badge">всего: {{ categories|length }}</span>
+  </div>
 
-<a href="{% url 'expense_category_create' %}" class="btn btn-primary mb-3">Добавить категорию</a>
+  <div class="page-head__right">
+    <a href="{% url 'expense_category_create' %}" class="btn btn-primary">
+      + Добавить категорию
+    </a>
+  </div>
+</section>
 
-<table class="table table-striped">
-  <thead>
-    <tr><th>ID</th><th>Название</th><th>Действия</th></tr>
-  </thead>
-  <tbody>
-  {% for c in categories %}
-    <tr>
-      <td>{{ c.id }}</td>
-      <td>{{ c.expenseName }}</td>
-      <td>
-        <a href="{% url 'expense_category_update' c.id %}" class="btn btn-sm btn-warning">Изменить</a>
-        <a href="{% url 'expense_category_delete' c.id %}" class="btn btn-sm btn-danger">Удалить</a>
-      </td>
-    </tr>
-  {% empty %}
-    <tr><td colspan="3">Нет категорий</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+<section class="card container">
+  {% if categories %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th class="actions">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in categories %}
+            <tr>
+              <td class="muted">#{{ c.id }}</td>
+              <td class="name">{{ c.expenseName }}</td>
+              <td class="actions">
+                <a href="{% url 'expense_category_update' c.id %}" class="btn btn-small btn-outline">Изменить</a>
+                <a href="{% url 'expense_category_delete' c.id %}" class="btn btn-small btn-danger">Удалить</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">
+      <h3>Пока нет категорий</h3>
+      <p>Создайте вашу первую категорию, чтобы удобнее учитывать траты.</p>
+      <a href="{% url 'expense_category_create' %}" class="btn btn-primary">Создать категорию</a>
+    </div>
+  {% endif %}
+</section>
+
 {% endblock %}

@@ -1,0 +1,80 @@
+.auth-wrap {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 24px;
+  background: linear-gradient(180deg, #1c3159, #0f2446);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 600px;/* компактнее белый блок */
+  background: #fff;
+  color: #0f1b2d;
+  border-radius: 14px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.25);
+  padding: 36px 40px;
+}
+
+.auth-title {
+  margin: 0 0 20px;
+  font-size: 28px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Выравниваем вывод {{ form.as_p }} */
+.auth-card form p{
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.auth-card form label{
+  display:block;
+  font-weight:600;
+  margin-bottom:6px;
+  color:#1d2a3b;
+  font-size:15px;
+}
+.auth-card form input[type="text"],
+.auth-card form input[type="email"],
+.auth-card form input[type="password"]{
+  width:100%;
+  border:1px solid #d9e2f0;
+  background:#f7f9fd;
+  border-radius:8px;
+  padding:10px 12px;
+  font-size:15px;
+  outline:none;
+  transition:.15s border,.15s box-shadow,.15s background;
+}
+.auth-card form input:focus{
+  border-color:#a8c3ff;
+  box-shadow:0 0 0 3px rgba(60,120,255,.15);
+  background:#fff;
+}
+
+/* ошибки/подсказки Django */
+ul.errorlist{ margin:4px 0 0; padding-left:20px; color:#c5283d; font-size:13px; }
+.helptext{ display:block; color:#6b7c93; font-size:13px; margin-top:4px; line-height:1.4; }
+
+.btn-primary{
+  width:100%;
+  display:block;
+  border:none;
+  border-radius:10px;
+  background:#3663ff;
+  color:#fff;
+  font-weight:600;
+  font-size:16px;
+  padding:12px;
+  margin-top:6px;
+  transition:.15s;
+  box-shadow:0 4px 15px rgba(54,99,255,.25);
+}
+.btn-primary:hover{ filter:brightness(.96); }
+
+.auth-note{ margin-top:18px; color:#6c7a8f; text-align:center; }
+.auth-note a{ color:#0b4fff; text-decoration:none; }
+.auth-note a:hover{ text-decoration:underline; }
