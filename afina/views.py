@@ -1,5 +1,4 @@
 
-from django.contrib.messages.context_processors import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -66,7 +65,7 @@ def income_category_create(request):
             obj.owner = request.user
             obj.is_default = False
             obj.save()
-            messages.success(request, 'Категория доходов добавлена.')
+            messages.success(request, '✅ Категория доходов добавлена.')
             return redirect('income_category_list')
     else:
         form = IncomeCategoryForm()
@@ -76,34 +75,37 @@ def income_category_create(request):
 @login_required
 def income_category_update(request, pk):
     category = get_object_or_404(IncomeCategory, pk=pk)
-
-    # запрещаем менять общие и чужие
     if category.owner is None or category.owner != request.user or (category.is_default and category.incomeName.lower() == 'другое'):
-        return HttpResponseForbidden('Нельзя изменять общие или дефолтные категории.')
+        messages.error(request, '❌ Нельзя изменять общие или дефолтные категории.')
+        return redirect('income_category_list')
 
     if request.method == 'POST':
         form = IncomeCategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Категория доходов обновлена.')
+            messages.success(request, '✅ Категория доходов обновлена.')
             return redirect('income_category_list')
     else:
         form = IncomeCategoryForm(instance=category)
     return render(request, 'income_category_form.html', {'form': form, 'title': 'Изменить категорию доходов'})
+
 
 @login_required
 def income_category_delete(request, pk):
     category = get_object_or_404(IncomeCategory, pk=pk)
 
     if category.owner != request.user or (category.is_default and category.incomeName.lower() == 'другое'):
-        return HttpResponseForbidden('Нельзя удалять общие или дефолтные категории.')
+        messages.error(request, "❌ Нельзя удалить общие или дефолтные категории.")
+        return redirect('income_category_list')
 
     if request.method == 'POST':
         name = category.incomeName
-        category.delete()  # 👈 сигнал переназначит связанные Income на «Другое»
-        messages.success(request, f"Категория доходов «{name}» удалена, записи переназначены на «Другое».")
+        category.delete()
+        messages.success(request, f"✅ Категория доходов «{name}» удалена, записи переназначены на «Другое».")
         return redirect('income_category_list')
+
     return render(request, 'income_category_confirm_delete.html', {'category': category})
+
 
 
 
@@ -149,15 +151,19 @@ def expense_category_update(request, pk):
 def expense_category_delete(request, pk):
     category = get_object_or_404(ExpenseCategory, pk=pk)
 
+    # Проверяем: если дефолтная или не твоя — просто показываем всплывающее сообщение и возвращаемся
     if category.owner != request.user or (category.is_default and category.expenseName.lower() == 'другое'):
-        return HttpResponseForbidden('Нельзя удалять общие или дефолтные категории.')
+        messages.error(request, "❌ Нельзя удалить общие или дефолтные категории.")
+        return redirect('expense_category_list')
 
     if request.method == 'POST':
         name = category.expenseName
-        category.delete()  # 👈 сигнал переназначит связанные Expense на «Другое»
-        messages.success(request, f"Категория расходов «{name}» удалена, записи переназначены на «Другое».")
+        category.delete()
+        messages.success(request, f"✅ Категория «{name}» удалена, записи переназначены на «Другое».")
         return redirect('expense_category_list')
+
     return render(request, 'expense_category_confirm_delete.html', {'category': category})
+
 
 
 # -------- Income CRUD --------

@@ -1,24 +1,139 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Удалить категорию</title>
-    <style>
-        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
-        .actions { margin-top: 16px; display: flex; gap: 8px; }
-        button, a.button { background: #dc2626; color: #fff; padding: 8px 12px; border-radius: 6px; text-decoration: none; border: none; cursor: pointer; }
-        a.button { background: #6b7280; }
-    </style>
-</head>
-<body>
-<h1>Удалить категорию</h1>
-<p>Вы уверены, что хотите удалить категорию: <strong>{{ category.incomeName }}</strong>?</p>
-<form method="post">
-    {% csrf_token %}
-    <div class="actions">
-        <button type="submit">Удалить</button>
-        <a class="button" href="{% url 'income_category_list' %}">Отмена</a>
+{% extends 'base.html' %}
+{% block title %}Удаление категории доходов{% endblock %}
+
+{% block extra_css %}
+<style>
+  .site-header::before,
+  .site-header::after { display: none !important; content: none !important; }
+  header::before,
+  header::after { display: none !important; content: none !important; }
+
+  .confirm-wrapper{
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: #f6f8fb;
+  }
+  .confirm-card{
+    width: min(560px, 94vw);
+    background: #fff;
+    border: 1px solid #e9eef5;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.12);
+    padding: 28px 26px;
+  }
+  .confirm-card h1{
+    margin: 0 0 8px;
+    font-size: 24px;
+    color: #0f172a;
+  }
+  .confirm-card p{
+    margin: 0 0 18px;
+    color: #475569;
+    line-height: 1.5;
+  }
+  .confirm-note{
+    background: #fff7ed;
+    color: #7c2d12;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+  .confirm-actions{
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .15s background, .15s box-shadow, .15s transform;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-danger{
+    background: #e11d48;
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(225,29,72,.22);
+  }
+  .btn-danger:hover{ background: #be123c; }
+
+  .btn-secondary{
+    background: #eef2f7;
+    color: #0f172a;
+    border-color: #e2e8f0;
+  }
+  .btn-secondary:hover{ background: #e2e8f0; }
+
+  .kbd-hint{
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: #64748b;
+    text-align: right;
+  }
+  kbd{
+    background:#f1f5f9; border:1px solid #e2e8f0; border-bottom-width:2px;
+    padding:2px 6px; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-wrapper">
+  <div class="confirm-card" role="dialog" aria-labelledby="dlg-title">
+    <h1 id="dlg-title">Удалить категорию?</h1>
+
+    <p>
+      Вы собираетесь удалить категорию доходов <b>«{{ category.incomeName }}»</b>.
+      Все связанные доходы будут автоматически переназначены на <b>«Другое»</b>.
+      Действие необратимо.
+    </p>
+
+    <div class="confirm-note">
+      Если сомневаетесь — вернитесь к списку категорий.
     </div>
-</form>
-</body>
-</html>
+
+    <form method="post" class="confirm-actions">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Да, удалить</button>
+      <a href="{% url 'income_category_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+
+    <div class="kbd-hint">Подсказка: <kbd>Enter</kbd> — удалить, <kbd>Esc</kbd> — отмена</div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('.confirm-actions');
+
+    document.addEventListener('keydown', (e) => {
+      // Esc — отмена
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        window.location.href = "{% url 'income_category_list' %}";
+      }
+
+      // Enter — подтверждение
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (form) form.submit();
+      }
+    });
+  });
+</script>
+{% endblock %}
