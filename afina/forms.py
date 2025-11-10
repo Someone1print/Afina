@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
 from datetime import date
+from django.db.models import Q
 
 
 class RegisterForm(UserCreationForm):
@@ -43,8 +44,30 @@ class IncomeForm(forms.ModelForm):
 
     # чтобы Django понимал ввод '21.10.2025' и другие локальные варианты
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+
+        # форматы даты (оставляем как было)
         self.fields['date'].input_formats = ['%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y']
+        self.fields['date'].initial = date.today()
+
+        # --- категории ---
+        if user is not None:
+            # все категории пользователя + общие
+            qs = (
+                IncomeCategory.objects
+                .filter(Q(owner=user) | Q(owner__isnull=True))
+                .order_by('-is_default', 'incomeName')
+            )
+            self.fields['category'].queryset = qs
+
+            # 🔹 дефолтная категория — “Другое”
+            default_cat = qs.filter(incomeName__iexact="Другое").first()
+            if default_cat:
+                self.fields['category'].initial = default_cat
+        else:
+            # если user нет, пустой queryset (на всякий случай)
+            self.fields['category'].queryset = IncomeCategory.objects.none()
 
 
 class ExpenseForm(forms.ModelForm):
@@ -63,15 +86,34 @@ class ExpenseForm(forms.ModelForm):
             'note': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
         }
-
+    # чтобы Django понимал ввод '21.10.2025' и другие локальные варианты
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        # Разрешаем ввод разных форматов даты
+
+        # форматы даты (оставляем как было)
         self.fields['date'].input_formats = ['%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y']
-        # По умолчанию — сегодняшняя дата
         self.fields['date'].initial = date.today()
-        self.fields['category'].label_from_instance = lambda obj: getattr(obj, 'expenseName',
-                                                                          getattr(obj, 'name', str(obj)))
+
+        # --- категории ---
+        if user is not None:
+            # все категории пользователя + общие
+            qs = (
+                ExpenseCategory.objects
+                .filter(Q(owner=user) | Q(owner__isnull=True))
+                .order_by('-is_default', 'expenseName')
+            )
+            self.fields['category'].queryset = qs
+
+            # 🔹 дефолтная категория — “Другое”
+            default_cat = qs.filter(expenseName__iexact="Другое").first()
+            if default_cat:
+                self.fields['category'].initial = default_cat
+        else:
+            # если user нет, пустой queryset (на всякий случай)
+            self.fields['category'].label_from_instance = lambda obj: getattr(obj, 'expenseName',
+                                                                              getattr(obj, 'name', str(obj)))
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:

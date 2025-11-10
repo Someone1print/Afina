@@ -2,21 +2,133 @@
 Group project for PI-4-23
 
 ## Setup
+💼# 💼 Afina — финансовый помощник
 
-### Database Configuration
+**Afina** — это Django-приложение для учёта доходов и расходов с персональными категориями и профилями пользователей.  
+Каждый пользователь имеет собственные записи и может добавлять свои категории поверх стандартных.
+---
 
-The project uses `afina/local_settings.py` for database settings. This file is tracked in git but **protected from commits** via a pre-commit hook.
+## 🚀 Установка и запуск проекта
 
-**After cloning the repository:**
+### 1. Клонировать репозиторий
+```bash
+git clone https://github.com/username/afina.git
+cd afina
+```
 
-1. Install the git hooks by running:
-   - **Windows (Git Bash):** `./scripts/setup-hooks.sh`
+### 2. Создать виртуальное окружение
+```bash
+python -m venv .venv
+```
+Активировать:
+- **Windows:**  
+  ```bash
+  .venv\Scripts\activate
+  ```
+- **Linux/Mac:**  
+  ```bash
+  source .venv/bin/activate
+  ```
+
+### 3. Установить зависимости
+```bash
+pip install -r requirements.txt
+```
+
+## 🧩 Настройка базы данных
+
+## 🗂️ Настройка файла local_settings.py
+
+Проект использует файл **`afina/local_settings.py`** для настройки базы данных.  
+Этот файл находится под контролем git, но **защищён от коммитов** с помощью pre-commit hook’а.
+
+**После клонирования репозитория:**
+
+1. Установите git-хуки, выполнив команду:  
+   - **Windows (Git Bash):** `./scripts/setup-hooks.sh`  
    - **Linux/Mac:** `bash scripts/setup-hooks.sh`
-2. The `local_settings.py` file will be available in your working directory
-3. Modify `local_settings.py` with your local database credentials as needed
-4. **Note:** Any changes to `local_settings.py` will be blocked from being committed by the pre-commit hook 
+2. Файл `local_settings.py` появится в вашей рабочей директории  
+3. Измените `local_settings.py`, указав свои локальные данные для подключения к базе данных  
+4. **Важно:** любые изменения в `local_settings.py` будут заблокированы от коммита pre-commit hook’ом  
 
-TO do 
-1. Инструкция для запуска проекта.
-2. Интсрукция для создания БД.
-3. Инструкция для подключения к проекту.
+
+### 4. Создать базу PostgreSQL
+Зайди в psql:
+```bash
+psql -U postgres
+CREATE DATABASE afina;
+```
+
+### 5. Применить миграции
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+---
+
+## 🏗️ Загрузить стандартные категории
+Запусти эту команду для того чтоб у тебя появились 5 стандартных категорий:
+```bash
+python manage.py shell -c "from afina.models import IncomeCategory,ExpenseCategory; IN=['Зарплата','Подарки','Проценты','Продажи','Другое']; EX=['Еда','Транспорт','Жильё','Развлечения','Другое']; [IncomeCategory.objects.get_or_create(owner=None, incomeName=n, defaults={'is_default': True}) for n in IN]; [ExpenseCategory.objects.get_or_create(owner=None, expenseName=n, defaults={'is_default': True}) for n in EX]; print('ok')"
+```
+
+
+## ▶️ Запуск сервера
+```bash
+python manage.py runserver
+```
+
+Открой в браузере:
+👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+---
+
+## 🧠 Основной функционал
+
+- Регистрация и авторизация пользователей.  
+- Доходы и расходы, привязанные к каждому пользователю.  
+- 5 стандартных категорий по умолчанию:  
+  **Зарплата, Подарки, Проценты, Продажи, Другое** для доходов.  
+  **Еда, Транспорт, Жильё, Развлечения, Другое** для расходов.  
+- Возможность добавлять свои категории.  
+- Профиль пользователя с валютой по умолчанию.
+
+---
+
+## 📁 Структура проекта
+```
+afina/
+├── afina/                # Django app (models, views, forms, urls)
+├── templates/            # HTML-шаблоны
+├── static/               # CSS, JS, изображения
+├── manage.py
+└── requirements.txt
+```
+
+---
+
+## ⚙️ Дополнительно
+
+### Проверка кода:
+```bash
+python manage.py check
+```
+
+### Открыть shell:
+```bash
+python manage.py shell
+```
+
+### Сброс базы:
+```bash
+python manage.py flush
+```
+
+---
+
+## 🧑‍💻 Авторы
+
+- **Команда Afina**
+
+---
