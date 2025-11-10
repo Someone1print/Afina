@@ -1,0 +1,90 @@
+/* Карточка страницы */
+.icard {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  margin: 24px auto 0;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Верхняя панель */
+.icard__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e9eef9;
+}
+.icard__topbar h1 {
+  margin: 0;
+  color: #223d77;
+  font-size: 28px;
+  font-weight: 800;
+}
+.icard__actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Таблица */
+.itable { margin-top: 16px; }
+
+/* белая шапка таблицы + акцентный текст */
+.table--clean {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table--clean thead {
+  background: #fff;
+  color: #223d77;
+  border-bottom: 2px solid #223d77;
+}
+.table--clean th,
+.table--clean td {
+  padding: 14px 16px;
+}
+.table--clean tbody tr:hover {
+  background: #f8fbff;
+}
+
+/* колонка действий */
+.col-actions { width: 220px; }
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Кнопки-утилиты для этой страницы (дополняют General.css) */
+.btn-secondary {
+  background-color: #6b7280;
+  color: #fff;
+}
+.btn-secondary:hover {
+  background-color: #565d69;
+}
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+/* Пустое состояние */
+.empty {
+  text-align: center;
+  padding: 40px 0 16px;
+  color: #6b7280;
+}
+.empty .btn { margin-top: 12px; }
+
+/* Адаптив */
+@media (max-width: 820px) {
+  .icard__topbar { flex-direction: column; align-items: stretch; }
+  .icard__actions { justify-content: flex-start; }
+  .col-actions { width: 160px; }
+}

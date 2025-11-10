@@ -1,19 +1,28 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends "base.html" %}
+{% load static %}
 
-<h2 class="text-center mb-4">Вход в систему</h2>
-
-<div class="mx-auto" style="max-width: 400px;">
-  <form method="post" class="border p-4 rounded">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary w-100">Войти</button>
-  </form>
-
-  <p class="text-center mt-3">
-    Нет аккаунта?
-    <a href="{% url 'register' %}">Зарегистрироваться</a>
-  </p>
-</div>
-
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/Login.css' %}">
 {% endblock %}
+
+{% block title %}Вход — AFINA{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1 class="auth-title">Вход в систему</h1>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn-primary">Войти</button>
+    </form>
+
+    <p class="auth-note">
+      Нет аккаунта?
+      <a href="{% url 'register' %}">Зарегистрироваться</a>
+    </p>
+  </div>
+</section>
+{% endblock %}
+

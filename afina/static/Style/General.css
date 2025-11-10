@@ -1,0 +1,370 @@
+/* =====================================================
+   🌐 ОСНОВНЫЕ СТИЛИ САЙТА AFINA
+   ===================================================== */
+
+/* --- Базовые настройки --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #223d77, #0f1931);
+  color: #f4f4f4;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Контейнер для содержимого страницы */
+.page-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+main.page-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 90%;
+  margin: 0 auto;
+  padding: 40px 0 80px;
+}
+
+/* =====================================================
+   🧭 HEADER / НАВИГАЦИЯ
+   ===================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: saturate(130%) blur(6px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.site-header .nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 70px;
+}
+
+/* Логотип */
+.logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #223d77;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+/* Ссылки навигации */
+.nav-links {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: 18px;
+}
+
+.nav-links a {
+  color: #222;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: 0.2s ease;
+}
+
+.nav-links a:hover {
+  background: #eef3ff;
+  color: #223d77;
+}
+
+/* Выпадающее меню */
+.dropdown {
+  position: relative;
+}
+
+.dropdown > a::after {
+  content: "▾";
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  background: #fff;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  border-radius: 10px;
+  border: 1px solid #e8eefc;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  padding: 8px 0;
+  z-index: 1001;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 16px;
+  color: #1b2437;
+  text-decoration: none;
+  transition: 0.15s;
+}
+
+.dropdown-menu a:hover {
+  background: #f3f7ff;
+  color: #223d77;
+}
+
+/* =====================================================
+   📋 ОСНОВНОЙ КОНТЕНТ / ТАБЛИЦЫ / КНОПКИ
+   ===================================================== */
+
+h1, h2, h3 {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #ffffff0d;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table thead {
+  background-color: #ffffff;
+  color: #fff;
+  border-radius: 2px;
+}
+
+.table th, .table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #223d77;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #1c3066;
+}
+
+.btn-warning {
+  background-color: #f5b642;
+  color: #222;
+}
+
+.btn-warning:hover {
+  background-color: #e0a21b;
+}
+
+.btn-danger {
+  background-color: #c93a3a;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #b62d2d;
+}
+
+/* =====================================================
+   🧾 ФОРМЫ (Login / Register / Profile)
+   ===================================================== */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccd3e6;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+form input:focus {
+  outline: none;
+  border-color: #223d77;
+  box-shadow: 0 0 0 2px rgba(34, 61, 119, 0.2);
+}
+
+/* =====================================================
+   ⚙️ ALERT / МЕССЕДЖИ
+   ===================================================== */
+
+.alert {
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.alert-info {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* =====================================================
+   📱 АДАПТИВНОСТЬ
+   ===================================================== */
+
+@media (max-width: 880px) {
+  .nav-links {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .dropdown-menu {
+    position: static;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+  }
+
+  .dropdown-menu a {
+    padding: 6px 10px;
+  }
+}
+
+/* =====================================================
+   ⚓ FOOTER
+   ===================================================== */
+
+/* =====================================================
+   ⚓ FOOTER (AFINA стиль)
+   ===================================================== */
+
+footer {
+  background: linear-gradient(180deg, #0e1730 0%, #0a1223 100%);
+  color: #ffffff;
+  text-align: center;
+  padding: 40px 0 25px;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+  font-size: 15px;
+}
+
+footer .footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+footer p {
+  margin-bottom: 14px;
+  color: #d4d9e5;
+  font-size: 14px;
+}
+
+footer ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 0;
+  padding: 0;
+}
+
+footer ul li a {
+  color: #b9c3dd;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+footer ul li a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  footer ul {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Имя пользователя в хэдере */
+.nav-username {
+  margin-left: 25px;
+  background-color: #223d77;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.3s ease, transform 0.2s;
+}
+
+.nav-username:hover {
+  background-color: #1b2f63;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Если пользователь не вошёл */
+.nav-login {
+  margin-left: 25px;
+  color: #223d77;
+  font-weight: 600;
+  text-decoration: none;
+  border: 2px solid #223d77;
+  padding: 8px 18px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.nav-login:hover {
+  background: #223d77;
+  color: white;
+}
