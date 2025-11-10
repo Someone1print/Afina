@@ -71,6 +71,40 @@ main.page-content {
   text-decoration: none;
   letter-spacing: 0.5px;
 }
+/* ===== ЛОГО В ХЭДЕРЕ ===== */
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #223d77;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-weight: 800;
+  color: #223d77;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.logo-link:hover .logo-text {
+  color: #1c3066;
+}
+
 
 /* Ссылки навигации */
 .nav-links {

@@ -46,6 +46,7 @@
 .table--clean th,
 .table--clean td {
   padding: 14px 16px;
+  color: #1a1a1a;
 }
 .table--clean tbody tr:hover {
   background: #f8fbff;

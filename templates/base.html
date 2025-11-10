@@ -16,8 +16,12 @@
   <!-- HEADER -->
   <header class="site-header">
   <div class="container nav">
-    <a class="logo" href="{% url 'home' %}">AFINA</a>
-    <p class="auth-hint">Вы вошли как <strong>{{ user.username }}</strong></p>
+    <div class="logo">
+  <a href="{% url 'home' %}" class="logo-link">
+    <img src="{% static 'afina/images/afina-logo.png' %}" alt="AFINA Logo" class="logo-img">
+    <span class="logo-text">AFINA</span>
+  </a>
+</div>
     <ul class="nav-links">
           <li><a href="{% url 'home' %}">Главная</a></li>
           <li class="dropdown">
