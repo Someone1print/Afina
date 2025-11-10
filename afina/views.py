@@ -7,6 +7,10 @@ from .forms import RegisterForm
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
 from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm)
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+
 
 
 # Регистрация
@@ -36,6 +40,7 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 # Логаут
+@login_required
 def logout_view(request):
     logout(request)
     print("Вы вышли из системы")
@@ -47,47 +52,65 @@ def home_view(request):
 # -------------------------
 # IncomeCategory CRUD views
 # -------------------------
+@login_required
 def income_category_list(request):
-    categories = IncomeCategory.objects.all().order_by('incomeName')
+    categories = income_categories_for_user(request.user)
     return render(request, 'income_category_list.html', {'categories': categories})
 
+@login_required
 def income_category_create(request):
     if request.method == 'POST':
         form = IncomeCategoryForm(request.POST)
         if form.is_valid():
-            form.save()
+            obj = form.save(commit=False)
+            obj.owner = request.user
+            obj.is_default = False
+            obj.save()
+            messages.success(request, 'Категория доходов добавлена.')
             return redirect('income_category_list')
     else:
         form = IncomeCategoryForm()
-    return render(request, 'income_category_form.html', {'form': form, 'title': 'Добавить категорию'})
+    return render(request, 'income_category_form.html', {'form': form, 'title': 'Добавить категорию доходов'})
 
+
+@login_required
 def income_category_update(request, pk):
     category = get_object_or_404(IncomeCategory, pk=pk)
+
+    # запрещаем менять общие и чужие
+    if category.owner is None or category.owner != request.user or (category.is_default and category.incomeName.lower() == 'другое'):
+        return HttpResponseForbidden('Нельзя изменять общие или дефолтные категории.')
+
     if request.method == 'POST':
         form = IncomeCategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Категория доходов обновлена.')
             return redirect('income_category_list')
     else:
         form = IncomeCategoryForm(instance=category)
-    return render(request, 'income_category_form.html', {'form': form, 'title': 'Изменить категорию'})
+    return render(request, 'income_category_form.html', {'form': form, 'title': 'Изменить категорию доходов'})
 
+@login_required
 def income_category_delete(request, pk):
     category = get_object_or_404(IncomeCategory, pk=pk)
+
+    if category.owner != request.user or (category.is_default and category.incomeName.lower() == 'другое'):
+        return HttpResponseForbidden('Нельзя удалять общие или дефолтные категории.')
+
     if request.method == 'POST':
-        category.delete()
+        name = category.incomeName
+        category.delete()  # 👈 сигнал переназначит связанные Income на «Другое»
+        messages.success(request, f"Категория доходов «{name}» удалена, записи переназначены на «Другое».")
         return redirect('income_category_list')
     return render(request, 'income_category_confirm_delete.html', {'category': category})
 
-# -------- IncomeCategory (у тебя уже есть) --------
-# оставь свои функции как есть:
-# income_category_list, income_category_create, income_category_update, income_category_delete
 
 
 # -------- ExpenseCategory CRUD --------
 @login_required
 def expense_category_list(request):
-    categories = ExpenseCategory.objects.all().order_by('expenseName')
+    categories = categories_for_user(request.user)
     return render(request, 'expense_category_list.html', {'categories': categories})
 
 @login_required
@@ -95,29 +118,44 @@ def expense_category_create(request):
     if request.method == 'POST':
         form = ExpenseCategoryForm(request.POST)
         if form.is_valid():
-            form.save()
+            obj = form.save(commit=False)
+            obj.owner = request.user
+            obj.is_default = False
+            obj.save()
+            messages.success(request, 'Категория расходов добавлена.')
             return redirect('expense_category_list')
     else:
         form = ExpenseCategoryForm()
-    return render(request, 'expense_category_form.html', {'form': form, 'title': 'Добавить категорию расхода'})
+    return render(request, 'expense_category_form.html', {'form': form, 'title': 'Добавить категорию расходов'})
 
 @login_required
 def expense_category_update(request, pk):
     category = get_object_or_404(ExpenseCategory, pk=pk)
+
+    if category.owner is None or category.owner != request.user or (category.is_default and category.expenseName.lower() == 'другое'):
+        return HttpResponseForbidden('Нельзя изменять общие или дефолтные категории.')
+
     if request.method == 'POST':
         form = ExpenseCategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Категория расходов обновлена.')
             return redirect('expense_category_list')
     else:
         form = ExpenseCategoryForm(instance=category)
-    return render(request, 'expense_category_form.html', {'form': form, 'title': 'Изменить категорию расхода'})
+    return render(request, 'expense_category_form.html', {'form': form, 'title': 'Изменить категорию расходов'})
 
 @login_required
 def expense_category_delete(request, pk):
     category = get_object_or_404(ExpenseCategory, pk=pk)
+
+    if category.owner != request.user or (category.is_default and category.expenseName.lower() == 'другое'):
+        return HttpResponseForbidden('Нельзя удалять общие или дефолтные категории.')
+
     if request.method == 'POST':
-        category.delete()
+        name = category.expenseName
+        category.delete()  # 👈 сигнал переназначит связанные Expense на «Другое»
+        messages.success(request, f"Категория расходов «{name}» удалена, записи переназначены на «Другое».")
         return redirect('expense_category_list')
     return render(request, 'expense_category_confirm_delete.html', {'category': category})
 
@@ -131,26 +169,26 @@ def income_list(request):
 @login_required
 def income_create(request):
     if request.method == 'POST':
-        form = IncomeForm(request.POST)
+        form = IncomeForm(request.POST, user=request.user)
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user = request.user
             obj.save()
             return redirect('income_list')
     else:
-        form = IncomeForm()
+        form = IncomeForm(user=request.user)
     return render(request, 'income_form.html', {'form': form, 'title': 'Добавить доход'})
 
 @login_required
 def income_update(request, pk):
     item = get_object_or_404(Income, pk=pk, user=request.user)
     if request.method == 'POST':
-        form = IncomeForm(request.POST, instance=item)
+        form = IncomeForm(request.POST, instance=item, user=request.user)
         if form.is_valid():
             form.save()
             return redirect('income_list')
     else:
-        form = IncomeForm(instance=item)
+        form = IncomeForm(instance=item, user=request.user)
     return render(request, 'income_form.html', {'form': form, 'title': 'Изменить доход'})
 
 @login_required
@@ -170,26 +208,26 @@ def expense_list(request):
 @login_required
 def expense_create(request):
     if request.method == 'POST':
-        form = ExpenseForm(request.POST)
+        form = ExpenseForm(request.POST, user=request.user)
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user = request.user
             obj.save()
             return redirect('expense_list')
     else:
-        form = ExpenseForm()
+        form = ExpenseForm(user=request.user)
     return render(request, 'expense_form.html', {'form': form, 'title': 'Добавить расход'})
 
 @login_required
 def expense_update(request, pk):
     item = get_object_or_404(Expense, pk=pk, user=request.user)
     if request.method == 'POST':
-        form = ExpenseForm(request.POST, instance=item)
+        form = ExpenseForm(request.POST, instance=item, user=request.user)
         if form.is_valid():
             form.save()
             return redirect('expense_list')
     else:
-        form = ExpenseForm(instance=item)
+        form = ExpenseForm(instance=item, user=request.user)
     return render(request, 'expense_form.html', {'form': form, 'title': 'Изменить расход'})
 
 @login_required
@@ -221,17 +259,9 @@ def profile_edit(request):
 
 from django.contrib import messages
 
-@login_required(login_url='login')
-def expense_category_create(request):
-    if request.method == 'POST':
-        form = ExpenseCategoryForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Категория успешно добавлена!')
-            return redirect('expense_category_list')
-        else:
-            messages.error(request, 'Ошибка при добавлении категории. Попробуйте снова.')
-    else:
-        form = ExpenseCategoryForm()
-    return render(request, 'expense_category_form.html', {'form': form, 'title': 'Добавить категорию'})
 
+def categories_for_user(user):
+    return ExpenseCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'expenseName')
+
+def income_categories_for_user(user):
+    return IncomeCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'incomeName')
