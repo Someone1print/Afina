@@ -65,15 +65,6 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
----
-
-## 🏗️ Загрузить стандартные категории
-Запусти эту команду для того чтоб у тебя появились 5 стандартных категорий:
-```bash
-python manage.py shell -c "from afina.models import IncomeCategory,ExpenseCategory; IN=['Зарплата','Подарки','Проценты','Продажи','Другое']; EX=['Еда','Транспорт','Жильё','Развлечения','Другое']; [IncomeCategory.objects.get_or_create(owner=None, incomeName=n, defaults={'is_default': True}) for n in IN]; [ExpenseCategory.objects.get_or_create(owner=None, expenseName=n, defaults={'is_default': True}) for n in EX]; print('ok')"
-```
-
-
 ## ▶️ Запуск сервера
 ```bash
 python manage.py runserver
