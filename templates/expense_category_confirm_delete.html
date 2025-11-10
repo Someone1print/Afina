@@ -1,27 +1,53 @@
 {% extends 'base.html' %}
+{% block title %}Удаление категории{% endblock %}
+
+{% block extra_css %}
+<!-- ... стили оставь как есть ... -->
+{% endblock %}
+
 {% block content %}
-<header>
-    <nav>
-        <div class="logo">
-            <a href="{% url 'home' %}" style="text-decoration: none; color: #223d77;">AFINA</a>
-        </div>
-        <ul class="nav-links">
-            <li><a href="{% url 'home' %}">Главная</a></li>
-            <li><a href="{% url 'income_category_list' %}">Категории доходов</a></li>
-            <li><a href="{% url 'expense_category_list' %}">Категории расходов</a></li>
-            <li><a href="#">Копилка</a></li>
-            <li><a href="#">Подписка</a></li>
-            <li><a href="#">Статистика</a></li>
-        </ul>
-    </nav>
-</header>
+<div class="confirm-wrapper">
+  <div class="confirm-card" role="dialog" aria-labelledby="dlg-title">
+    <h1 id="dlg-title">Удалить категорию?</h1>
 
-<h2>Удалить категорию</h2>
-<p>Вы уверены, что хотите удалить <strong>{{ category.expenseName }}</strong>?</p>
+    <p>
+      Вы собираетесь удалить категорию <b>«{{ category.expenseName }}»</b>.
+      Все связанные расходы будут автоматически переназначены на <b>«Другое»</b>.
+      Действие необратимо.
+    </p>
 
-<form method="post">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-danger">Удалить</button>
-  <a href="{% url 'expense_category_list' %}" class="btn btn-secondary">Отмена</a>
-</form>
+    <div class="confirm-note">
+      Если сомневаетесь — вернитесь к списку категорий.
+    </div>
+
+    <form method="post" class="confirm-actions">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Да, удалить</button>
+      <a href="{% url 'expense_category_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+
+    <div class="kbd-hint">Подсказка: <kbd>Enter</kbd> — удалить, <kbd>Esc</kbd> — отмена</div>
+  </div>
+</div>
+
+<!-- 👇 ВОТ СЮДА вставь этот скрипт вместо старого -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('.confirm-actions');
+
+    document.addEventListener('keydown', (e) => {
+      // Esc — отмена
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        window.location.href = "{% url 'expense_category_list' %}";
+      }
+
+      // Enter — подтверждение
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (form) form.submit();
+      }
+    });
+  });
+</script>
 {% endblock %}
