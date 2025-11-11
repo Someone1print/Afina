@@ -61,7 +61,6 @@ CREATE DATABASE afina;
 
 ### 5. Применить миграции
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
