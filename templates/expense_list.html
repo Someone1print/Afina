@@ -4,6 +4,15 @@
 
 <a href="{% url 'expense_create' %}" class="btn btn-primary mb-3">Добавить расход</a>
 
+<form class="row g-2 mb-3" onsubmit="return false;">
+  <div class="col-auto"><input type="date" id="start" class="form-control" value="{{ request.GET.start }}"></div>
+  <div class="col-auto"><input type="date" id="end" class="form-control" value="{{ request.GET.end }}"></div>
+  <div class="col-auto">
+    <button class="btn btn-outline-secondary" onclick="reloadCharts()">Применить</button>
+    <button class="btn btn-link" onclick="clearDates()">Сбросить</button>
+  </div>
+</form>
+
 <table class="table table-striped">
   <thead>
     <tr><th>Дата</th><th>Категория</th><th>Сумма</th><th>Комментарий</th><th>Действия</th></tr>
@@ -25,4 +34,81 @@
   {% endfor %}
   </tbody>
 </table>
+
+<div class="row">
+  <div class="col-lg-6 mb-4">
+    <div class="card"><div class="card-body">
+      <h5 class="card-title">Расходы по категориям</h5>
+      <div id="plotByCategory" style="height:360px;"></div>
+    </div></div>
+  </div>
+  <div class="col-lg-6 mb-4">
+    <div class="card"><div class="card-body">
+      <h5 class="card-title">Расходы по месяцам</h5>
+      <div id="plotByMonth" style="height:360px;"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Plotly CDN -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+function qs(params = {}) {
+  const s = new URLSearchParams(params);
+  return s.toString() ? '?' + s.toString() : '';
+}
+function getRange() {
+  const start = document.getElementById('start').value;
+  const end = document.getElementById('end').value;
+  const p = {};
+  if (start) p.start = start;
+  if (end) p.end = end;
+  return p;
+}
+function clearDates(){
+  document.getElementById('start').value = '';
+  document.getElementById('end').value = '';
+  reloadCharts();
+}
+
+async function drawByCategory(){
+  const resp = await fetch("{% url 'expense_by_category_api' %}" + qs(getRange()));
+  const {labels, values} = await resp.json();
+
+  const data = [{
+    labels, values, type: 'pie', hole: 0.45, textinfo: 'percent+label',
+    hovertemplate: '%{label}: %{value:,.0f}<extra></extra>'
+  }];
+
+  const layout = {margin:{t:24,l:12,r:12,b:12}, showlegend:false};
+  Plotly.newPlot('plotByCategory', data, layout, {responsive:true, displayModeBar:false});
+}
+
+async function drawByMonth(){
+  const resp = await fetch("{% url 'expense_by_month_api' %}" + qs(getRange()));
+  const {labels, values} = await resp.json();
+
+  const data = [{
+    x: labels,
+    y: values,
+    type: 'scatter',
+    mode: 'lines+markers',
+    line: {shape: 'spline', width: 3, color: '#dc3545'},
+    marker: {size: 8, color: '#a71d2a', symbol: 'circle'},
+    hovertemplate: '%{x}: %{y:,.0f}<extra></extra>'
+  }];
+
+  const layout = {
+    margin:{t:24,l:48,r:12,b:48},
+    xaxis:{ title:'Месяц', automargin:true },
+    yaxis:{ title:'Сумма', separatethousands:true, rangemode:'tozero' },
+    hovermode:'x unified',
+  };
+
+  Plotly.newPlot('plotByMonth', data, layout, {responsive:true, displayModeBar:false});
+}
+
+function reloadCharts(){ drawByCategory(); drawByMonth(); }
+reloadCharts();
+</script>
 {% endblock %}
