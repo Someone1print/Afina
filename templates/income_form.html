@@ -1,35 +1,135 @@
 {% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+/* ---------- Форма ---------- */
+.form-container {
+    max-width: 600px;
+    margin: 100px auto 50px; /* форма чуть ниже сверху, центр по горизонтали */
+}
+
+.form-card {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.form-card h2 {
+    font-weight: 600;
+    color: #223d77;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(34, 61, 119, 0.25);
+    border-color: #223d77;
+}
+
+.text-danger {
+    font-size: 0.875rem;
+    margin-top: 5px;
+}
+
+/* ---------- Кнопки ---------- */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* расстояние между кнопками */
+}
+
+.button-group .btn {
+    flex: 1;                 /* равная ширина для всех кнопок */
+    min-width: 120px;        /* минимальная ширина */
+    padding: 10px 0;         /* вертикальный padding */
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-save {
+    background-color: #223d77;
+}
+
+.btn-save:hover {
+    background-color: #1a2d5b;
+}
+
+.btn-back {
+    background-color: #6c757d;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+}
+
+/* Адаптив для маленьких экранов */
+@media (max-width: 400px) {
+    .button-group .btn {
+        font-size: 0.9rem;
+        padding: 8px 0;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>{{ title }}</h2>
+<div class="form-container">
+    <div class="form-card">
+        <h2>{{ title }}</h2>
 
-<form method="post" novalidate>
-  {% csrf_token %}
+        <form method="post" novalidate>
+            {% csrf_token %}
 
-  <div class="mb-3">
-    <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
-    {{ form.category }}
-    {{ form.category.errors }}
-  </div>
+            <div class="mb-3">
+                <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                <div class="text-danger">{{ form.category.errors }}</div>
+                {% endif %}
+            </div>
 
-  <div class="mb-3">
-    <label for="{{ form.date.id_for_label }}" class="form-label">Дата</label>
-    {{ form.date }}
-    {{ form.date.errors }}
-  </div>
+            <div class="mb-3">
+                <label for="{{ form.date.id_for_label }}" class="form-label">Дата</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                <div class="text-danger">{{ form.date.errors }}</div>
+                {% endif %}
+            </div>
 
-  <div class="mb-3">
-    <label for="{{ form.amount.id_for_label }}" class="form-label">Сумма</label>
-    {{ form.amount }}
-    {{ form.amount.errors }}
-  </div>
+            <div class="mb-3">
+                <label for="{{ form.amount.id_for_label }}" class="form-label">Сумма</label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                <div class="text-danger">{{ form.amount.errors }}</div>
+                {% endif %}
+            </div>
 
-  <div class="mb-3">
-    <label for="{{ form.note.id_for_label }}" class="form-label">Комментарий</label>
-    {{ form.note }}
-    {{ form.note.errors }}
-  </div>
+            <div class="mb-3">
+                <label for="{{ form.note.id_for_label }}" class="form-label">Комментарий</label>
+                {{ form.note }}
+                {% if form.note.errors %}
+                <div class="text-danger">{{ form.note.errors }}</div>
+                {% endif %}
+            </div>
 
-  <button type="submit" class="btn btn-success">Сохранить</button>
-  <a href="{% url 'income_list' %}" class="btn btn-secondary">Назад</a>
-</form>
+            <div class="button-group mt-4">
+                <button type="submit" class="btn btn-save">Сохранить</button>
+                <a href="{% url 'income_list' %}" class="btn btn-back">Назад</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
