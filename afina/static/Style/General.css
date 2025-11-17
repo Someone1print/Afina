@@ -402,3 +402,229 @@ footer ul li a:hover {
   background: #223d77;
   color: white;
 }
+/* Чтобы колонка "Действия" была справа и ровно */
+td.actions {
+  text-align: right;
+  vertical-align: middle;
+  width: 260px;           /* фикс ширина колонки действий, можно подправить */
+}
+
+.buttons {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.name-cell {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.text-muted {
+  color: #6b7280;
+  font-style: italic;
+  margin-left: 6px;
+}
+
+/* ================================
+   Категории (карточка, шапка, таблица)
+   ================================ */
+.cat-page {
+  margin: 40px auto;
+  max-width: 1180px;
+  padding: 0 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 22px rgba(15, 25, 49, .15);
+  padding: 20px 20px 8px;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.card__header h1 {
+  color: #223d77;
+  font-weight: 800;
+  font-size: 32px;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #223d77;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.toolbar { display: flex; gap: 10px; }
+
+/* Таблица в карточке (как у расходов) */
+.cat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cat-table thead th {
+  background: #f6f8ff;
+  color: #0f1a33;
+  font-weight: 700;
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 2px solid #1d3770;
+}
+
+.cat-table tbody td {
+  padding: 18px 16px;
+  border-bottom: 1px solid #eef0f6;
+  color: #0f1a33;
+}
+
+.cat-table tbody tr:hover {
+  background: #fafbff;
+}
+
+.cat-table .muted { color: #6b7280; }
+.cat-table .name  { font-weight: 700; color: #0f1a33; }
+.cat-table .actions { text-align: right; white-space: nowrap; }
+
+/* ================================
+   Кнопки и плашки, которых не хватало
+   ================================ */
+.btn-small { height: 34px; padding: 0 12px; font-size: 14px; line-height: 34px; }
+.btn-outline {
+  background: #fff;
+  color: #1e3a8a;
+  border: 1.5px solid #c7d2fe;
+}
+.btn-outline:hover { background: #eef2ff; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f2f4fb;
+  color: #53607a;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  user-select: none;
+}
+.pill-muted { background: #eef1f7; color: #74809c; }
+
+/* ================================
+   Универсальная модалка подтверждения
+   ================================ */
+.no-scroll { overflow: hidden; }
+
+.modal { position: fixed; inset: 0; display: none; z-index: 70; }
+.modal.open { display: block; }
+
+.modal__overlay { position: absolute; inset: 0; background: rgba(10, 18, 38, .55); }
+
+.modal__content {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(460px, 92%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px 22px 18px;
+  box-shadow: 0 20px 60px rgba(15, 25, 49, .25);
+}
+
+.modal__content h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #0f1a33;
+}
+
+.modal__text { margin: 0 0 18px; color: #6b7280; }
+
+.modal__actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* --- Выравнивание текста по центру в кнопках --- */
+.btn,
+a.btn,
+button.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;         /* чтобы текст не прижимался */
+  vertical-align: middle;   /* центрирование по вертикали */
+  padding: 10px 18px;       /* одинаковые отступы */
+  font-weight: 600;
+}
+
+/* Специально для маленьких кнопок (btn-small) */
+.btn-small {
+  padding: 8px 14px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* ===== Pagination ===== */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.pagination__pages {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  margin: 0 8px;
+  padding: 0;
+}
+
+.pagination .page,
+.pagination .page.current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pagination .page {
+  background: #ffffff;
+  color: #223d77;
+  border: 1px solid #e8eefc;
+  transition: 0.2s ease;
+}
+
+.pagination .page:hover {
+  background: #f3f7ff;
+}
+
+.pagination .page.current {
+  background: #223d77;
+  color: #fff;
+  border: 1px solid #223d77;
+}
+
+/* Кнопка-«заглушка», когда переход недоступен */
+.btn.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

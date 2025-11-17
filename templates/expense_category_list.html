@@ -37,15 +37,68 @@
           {% for c in categories %}
             <tr>
               <td class="muted">#{{ c.id }}</td>
-              <td class="name">{{ c.expenseName }}</td>
-              <td class="actions">
-                <a href="{% url 'expense_category_update' c.id %}" class="btn btn-small btn-outline">Изменить</a>
-                <a href="{% url 'expense_category_delete' c.id %}" class="btn btn-small btn-danger">Удалить</a>
+
+              <!-- Название категории -->
+              <td class="name">
+                {{ c.expenseName }}
               </td>
+
+              <!-- Действия -->
+              <td class="actions">
+                  {% if not c.is_default %}
+                    <div class="buttons">
+                      <a href="{% url 'expense_category_update' c.id %}" class="btn btn-small btn-outline">Изменить</a>
+
+                      {# <-- ВАЖНО: ссылка-«кнопка» без href, с классом .js-delete и data-action #}
+                      <a href="#"
+                         class="btn btn-small btn-danger js-delete"
+                         data-action="{% url 'expense_category_delete' c.id %}">
+                        Удалить
+                      </a>
+                    </div>
+                  {% else %}
+                    <span class="locked-note">Нельзя изменить 🔒</span>
+                  {% endif %}
+            </td>
+
             </tr>
+
           {% endfor %}
         </tbody>
       </table>
+    {% if is_paginated %}
+<nav class="pagination">
+  {% if page_obj.has_previous %}
+    <a class="btn btn-outline btn-small" href="?page=1" aria-label="Первая">«</a>
+    <a class="btn btn-outline btn-small" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+  {% else %}
+    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">«</span>
+    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">Назад</span>
+  {% endif %}
+
+  <ul class="pagination__pages">
+    {# Показываем диапазон -2..+2 вокруг текущей страницы #}
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+        {% if num == page_obj.number %}
+          <li><span class="page current">{{ num }}</span></li>
+        {% else %}
+          <li><a class="page" href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+
+  {% if page_obj.has_next %}
+    <a class="btn btn-outline btn-small" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+    <a class="btn btn-outline btn-small" href="?page={{ paginator.num_pages }}" aria-label="Последняя">»</a>
+  {% else %}
+    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">Вперёд</span>
+    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">»</span>
+  {% endif %}
+</nav>
+{% endif %}
+
     </div>
   {% else %}
     <div class="empty">
@@ -55,5 +108,61 @@
     </div>
   {% endif %}
 </section>
+<!-- Модальное окно подтверждения удаления -->
+<div id="confirmModal" class="modal" aria-hidden="true">
+  <div class="modal__overlay"></div>
+  <div class="modal__content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Удалить категорию?</h3>
+    <p class="modal__text">Это действие нельзя отменить.</p>
+    <form id="confirmForm" method="post">
+      {% csrf_token %}
+      <div class="modal__actions">
+        <button type="button" class="btn btn-outline" data-close>Отмена</button>
+        <button type="submit" class="btn btn-danger">Удалить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(() => {
+  const modal = document.getElementById('confirmModal');
+  const form  = document.getElementById('confirmForm');
+
+  // открыть модалку
+  function openModal(action) {
+    form.setAttribute('action', action);
+    modal.classList.add('open');
+    document.body.classList.add('no-scroll');
+  }
+
+  // закрыть модалку
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.classList.remove('no-scroll');
+  }
+
+  // привязка кнопок
+  document.querySelectorAll('.js-delete').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      openModal(btn.dataset.action);
+    });
+  });
+
+  // закрытие по клику вне окна или по кнопке «Отмена»
+  modal.addEventListener('click', e => {
+    if (e.target === modal || e.target.hasAttribute('data-close')) closeModal();
+  });
+
+  // закрытие по ESC
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+})();
+</script>
+
+
+
 
 {% endblock %}

@@ -6,16 +6,12 @@ from .forms import RegisterForm
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
 from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm)
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.contrib import messages
-from django.http import HttpResponseForbidden
-#Все что нужно для графиков
-from django.http import JsonResponse
-from django.db.models import Sum
+from django.http import HttpResponseForbidden, JsonResponse
+from django.core.paginator import Paginator
 from django.db.models.functions import TruncMonth
 from django.utils.dateparse import parse_date
-from .models import Expense
-
 
 # Регистрация
 # metodi bystroy razrabotki
@@ -58,8 +54,18 @@ def home_view(request):
 # -------------------------
 @login_required
 def income_category_list(request):
-    categories = income_categories_for_user(request.user)
-    return render(request, 'income_category_list.html', {'categories': categories})
+    qs = IncomeCategory.objects.order_by('id')
+    paginator = Paginator(qs, 6)               # по 8 записей на страницу
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number) # безопасно: сам обрабатывает мусорные значения
+
+    ctx = {
+        'categories': page_obj.object_list,    # чтобы твой шаблон продолжал работать
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+    return render(request, 'income_category_list.html', ctx)
 
 @login_required
 def income_category_create(request):
@@ -117,9 +123,18 @@ def income_category_delete(request, pk):
 # -------- ExpenseCategory CRUD --------
 @login_required
 def expense_category_list(request):
-    categories = categories_for_user(request.user)
-    return render(request, 'expense_category_list.html', {'categories': categories})
+    qs = ExpenseCategory.objects.order_by('id')
+    paginator = Paginator(qs, 8)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
+    ctx = {
+        'categories': page_obj.object_list,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+    return render(request, 'expense_category_list.html', ctx)
 @login_required
 def expense_category_create(request):
     if request.method == 'POST':
