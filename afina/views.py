@@ -6,11 +6,12 @@ from .forms import RegisterForm
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
 from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm)
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.contrib import messages
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.core.paginator import Paginator
-
+from django.db.models.functions import TruncMonth
+from django.utils.dateparse import parse_date
 
 # Регистрация
 # metodi bystroy razrabotki
@@ -290,3 +291,81 @@ def categories_for_user(user):
 
 def income_categories_for_user(user):
     return IncomeCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'incomeName')
+
+#Создание графиков для доходов
+
+@login_required
+def expense_by_category_api(request):
+    qs = Expense.objects.filter(user=request.user)
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        qs = qs.filter(date__gte=parse_date(start))
+    if end:
+        qs = qs.filter(date__lte=parse_date(end))
+
+    agg = (qs.values('category__expenseName')
+             .annotate(total=Sum('amount'))
+             .order_by('-total'))
+
+    labels = [row['category__expenseName'] for row in agg]
+    values = [float(row['total'] or 0) for row in agg]
+    return JsonResponse({"labels": labels, "values": values})
+
+@login_required
+def expense_by_month_api(request):
+    qs = Expense.objects.filter(user=request.user)
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        qs = qs.filter(date__gte=parse_date(start))
+    if end:
+        qs = qs.filter(date__lte=parse_date(end))
+
+    agg = (qs.annotate(m=TruncMonth('date'))
+             .values('m')
+             .annotate(total=Sum('amount'))
+             .order_by('m'))
+
+    labels = [row['m'].strftime('%b %Y') for row in agg]  # например: "Ноя 2025"
+    values = [float(row['total'] or 0) for row in agg]
+    return JsonResponse({"labels": labels, "values": values})
+
+#Создание графиков для расходов
+
+@login_required
+def income_by_category_api(request):
+    qs = Income.objects.filter(user=request.user)
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        qs = qs.filter(date__gte=parse_date(start))
+    if end:
+        qs = qs.filter(date__lte=parse_date(end))
+
+    agg = (qs.values('category__incomeName')
+             .annotate(total=Sum('amount'))
+             .order_by('-total'))
+
+    labels = [row['category__incomeName'] for row in agg]
+    values = [float(row['total'] or 0) for row in agg]
+    return JsonResponse({"labels": labels, "values": values})
+
+@login_required
+def income_by_month_api(request):
+    qs = Income.objects.filter(user=request.user)
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        qs = qs.filter(date__gte=parse_date(start))
+    if end:
+        qs = qs.filter(date__lte=parse_date(end))
+
+    agg = (qs.annotate(m=TruncMonth('date'))
+             .values('m')
+             .annotate(total=Sum('amount'))
+             .order_by('m'))
+
+    labels = [row['m'].strftime('%b %Y') for row in agg]
+    values = [float(row['total'] or 0) for row in agg]
+    return JsonResponse({"labels": labels, "values": values})

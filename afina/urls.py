@@ -25,6 +25,7 @@ urlpatterns = [
     # Auth
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
+    path('accounts/login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
 
     # IncomeCategory CRUD
@@ -43,12 +44,17 @@ urlpatterns = [
     path('incomes/create/', views.income_create, name='income_create'),
     path('incomes/<int:pk>/edit/', views.income_update, name='income_update'),
     path('incomes/<int:pk>/delete/', views.income_delete, name='income_delete'),
-
+    # API для Plotly-графиков доходов
+    path('api/incomes/by-category/', views.income_by_category_api, name='income_by_category_api'),
+    path('api/incomes/by-month/', views.income_by_month_api, name='income_by_month_api'),
     # Expenses
     path('expenses/', views.expense_list, name='expense_list'),
     path('expenses/create/', views.expense_create, name='expense_create'),
     path('expenses/<int:pk>/edit/', views.expense_update, name='expense_update'),
     path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
+    # Plotly API
+    path('api/expenses/by-category/', views.expense_by_category_api, name='expense_by_category_api'),
+    path('api/expenses/by-month/', views.expense_by_month_api, name='expense_by_month_api'),
 
     # Profile
     path('profile/', views.profile_view, name='profile_view'),
