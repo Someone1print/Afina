@@ -16,13 +16,24 @@ Including another URLconf
 """
 
 # from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from . import views
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
+from django.urls import path, include
+
 
 urlpatterns = [
     path('', views.home_view, name='home'),
-
+    path('api/', include('afina.api_urls')),  # все API вынесем в afina/api_urls.py
     # Auth
+    # urls.py
+    path('api/auth/', include('rest_framework.urls')),  # логин/логаут для браузера
+
+
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -53,5 +64,10 @@ urlpatterns = [
     # Profile
     path('profile/', views.profile_view, name='profile_view'),
     path('profile/edit/', views.profile_edit, name='profile_edit'),
+
+    # ✅ Swagger / schema
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
