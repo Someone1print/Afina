@@ -1,0 +1,123 @@
+/* ===== Заголовок и кнопка сверху ===== */
+h2 {
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.btn-primary {
+    border-radius: 12px;
+    padding: 8px 18px;
+    font-weight: 600;
+}
+
+/* ===== Фильтры (даты + кнопки) ===== */
+form.row {
+    margin-bottom: 24px !important;
+}
+
+form.row input.form-control {
+    min-width: 170px;
+}
+
+form.row .btn {
+    border-radius: 10px;
+    padding: 6px 14px;
+}
+
+/* ===== Таблица расходов ===== */
+table.table {
+    background: #ffffff;
+    border-radius: 18px 18px 0 0;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+table thead {
+    background-color: #f5f7fb;
+}
+
+table thead th {
+    color: #000;
+    font-weight: 600;
+    padding: 14px 12px;
+}
+
+table tbody tr {
+    background: #ffffff;
+}
+
+table tbody tr:nth-child(odd) {
+    background-color: #f9fbff;
+}
+
+table tbody td {
+    color: #000;
+    vertical-align: middle;
+    padding: 12px 12px;
+}
+
+/* ===== Кнопки действий ===== */
+.btn-warning,
+.btn-danger {
+    border-radius: 999px;
+    font-size: 0.9rem;
+    padding: 4px 14px;
+}
+
+/* ===== Пагинация ===== */
+nav[aria-label="Навигация по страницам"] {
+    background-color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 0 0 18px 18px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.pagination .page-link {
+    border-radius: 999px !important;
+    background-color: #ffffff;
+    border: 1px solid #d0d7e2;
+    color: #1c274c;
+    padding: 6px 12px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #1c274c;
+    border-color: #1c274c;
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #f1f1f1;
+    border-color: #dcdcdc;
+    color: #8a8a8a;
+}
+
+/* ===== Карточки с графиками ===== */
+.card {
+    border-radius: 18px;
+    border: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-body {
+    background-color: #ffffff !important;
+}
+
+.card-title {
+    color: #000 !important;
+    font-weight: 600;
+}
+
+/* ===== Отступ снизу ===== */
+.container {
+    padding-bottom: 60px;
+}
+.chart-row {
+    display: block;
+    width: 100%;
+}
+.chart-row > div {
+    width: 100%;         /* каждый занимает всю ширину */
+    margin-bottom: 30px;          /* чтобы обе карточки были одинаковой ширины */
+}

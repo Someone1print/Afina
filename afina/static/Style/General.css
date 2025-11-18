@@ -9,6 +9,7 @@
   box-sizing: border-box;
 }
 
+
 html, body {
   height: 100%;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -369,39 +370,7 @@ footer ul li a:hover {
 }
 
 /* Имя пользователя в хэдере */
-.nav-username {
-  margin-left: 25px;
-  background-color: #223d77;
-  color: #fff;
-  padding: 8px 18px;
-  border-radius: 25px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.3s ease, transform 0.2s;
-}
 
-.nav-username:hover {
-  background-color: #1b2f63;
-  transform: translateY(-2px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Если пользователь не вошёл */
-.nav-login {
-  margin-left: 25px;
-  color: #223d77;
-  font-weight: 600;
-  text-decoration: none;
-  border: 2px solid #223d77;
-  padding: 8px 18px;
-  border-radius: 25px;
-  transition: all 0.3s ease;
-}
-
-.nav-login:hover {
-  background: #223d77;
-  color: white;
-}
 /* Чтобы колонка "Действия" была справа и ровно */
 td.actions {
   text-align: right;
@@ -507,7 +476,7 @@ td.actions {
 .btn-small { height: 34px; padding: 0 12px; font-size: 14px; line-height: 34px; }
 .btn-outline {
   background: #fff;
-  color: #1e3a8a;
+  color: #ffffff;
   border: 1.5px solid #c7d2fe;
 }
 .btn-outline:hover { background: #eef2ff; }

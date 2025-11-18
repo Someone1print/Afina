@@ -189,9 +189,19 @@ def expense_category_delete(request, pk):
 # -------- Income CRUD --------
 @login_required
 def income_list(request):
-    items = Income.objects.filter(user=request.user).select_related('category').order_by('-date','-id')
-    return render(request, 'income_list.html', {'items': items})
+    qs = Income.objects.filter(user=request.user) \
+                       .select_related('category') \
+                       .order_by('-date')
 
+    paginator = Paginator(qs, 7)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'items': page_obj.object_list,
+        'page_obj': page_obj,
+    }
+    return render(request, 'income_list.html', context)
 @login_required
 def income_create(request):
     if request.method == 'POST':
@@ -228,9 +238,19 @@ def income_delete(request, pk):
 # -------- Expense CRUD --------
 @login_required
 def expense_list(request):
-    items = Expense.objects.filter(user=request.user).select_related('category').order_by('-date','-id')
-    return render(request, 'expense_list.html', {'items': items})
+    qs = Expense.objects.filter(user=request.user) \
+                        .select_related('category') \
+                        .order_by('-date')
 
+    paginator = Paginator(qs, 7)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'items': page_obj.object_list,
+        'page_obj': page_obj,
+    }
+    return render(request, 'expense_list.html', context)
 @login_required
 def expense_create(request):
     if request.method == 'POST':
