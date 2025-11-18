@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
-
-{% block title %}Категории расходов — AFINA{% endblock %}
-
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'Style/Expense_Category.css' %}">
 {% endblock %}
+{% block title %}Категории расходов — AFINA{% endblock %}
+
+
 
 {% block content %}
 
@@ -57,7 +57,7 @@
                       </a>
                     </div>
                   {% else %}
-                    <span class="locked-note">Нельзя изменить 🔒</span>
+                    <span class="pill pill-muted">Нельзя изменить 🔒</span>
                   {% endif %}
             </td>
 
