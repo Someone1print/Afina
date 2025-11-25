@@ -12,6 +12,12 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.core.paginator import Paginator
 from django.db.models.functions import TruncMonth
 from django.utils.dateparse import parse_date
+import stripe
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.urls import reverse
+from django.http import JsonResponse
 
 # Регистрация
 # metodi bystroy razrabotki
@@ -389,3 +395,50 @@ def income_by_month_api(request):
     labels = [row['m'].strftime('%b %Y') for row in agg]
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
+
+@login_required
+def stripe_test_view(request):
+    """
+    Просто страница с кнопкой оплаты.
+    """
+    context = {
+        "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
+    }
+    return render(request, "stripe_test.html", context)
+
+
+@csrf_exempt   # ⚠ только для тестов, потом лучше переделать с нормальным CSRF
+@login_required
+def create_checkout_session(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=400)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            mode="subscription",
+            line_items=[
+                {
+                    "price": settings.STRIPE_PRICE_ID,
+                    "quantity": 1,
+                }
+            ],
+            success_url=request.build_absolute_uri(
+                reverse("stripe_success")
+            ) + "?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=request.build_absolute_uri(reverse("stripe_cancel")),
+        )
+        return JsonResponse({"id": checkout_session.id})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def stripe_success_view(request):
+    return render(request, "stripe_success.html")
+
+
+@login_required
+def stripe_cancel_view(request):
+    return render(request, "stripe_cancel.html")

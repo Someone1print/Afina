@@ -141,3 +141,120 @@
 @media (max-width: 640px){
   .home-features__grid{ grid-template-columns: 1fr; }
 }
+
+/* === Блок "Аналитика финансов" на главной === */
+
+.analytics-section {
+  margin: 60px auto 40px;
+  max-width: 1180px;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.analytics-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 24px;
+}
+
+/* Большая серая "капсула" */
+.analytics-card {
+  background: #D6E2FD52;               /* светло-серый как в макете */
+  border-radius: 32px;
+  padding: 32px 32px 28px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
+}
+
+/* Внутри — два блока по 50% ширины */
+.analytics-inner {
+  display: flex;
+  gap: 28px;
+}
+
+/* Белые карточки графиков */
+.chart-card {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 24px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Сам холст для графика */
+.chart-box {
+  width: 100%;
+  height: 260px;  /* подгони под нужную высоту */
+}
+
+/* Адаптив под маленькие экраны */
+@media (max-width: 900px) {
+  .analytics-inner {
+    flex-direction: column;
+  }
+
+  .analytics-card {
+    padding: 24px 18px;
+  }
+}
+.analytics-section {
+    margin-top: 60px;
+    text-align: center;
+}
+
+.analytics-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 32px;
+}
+
+.analytics-cards {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    background: #cfd3e0; /* серый фон блока */
+    padding: 40px;
+    border-radius: 20px;
+}
+.analytics-section {
+    margin-top: 60px;
+    text-align: center;
+}
+
+.analytics-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 32px;
+}
+
+.analytics-cards {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    background: #cfd3e0; /* серый фон блока */
+    padding: 40px;
+    border-radius: 20px;
+}
+
+.analytics-card {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.analytics-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 30px;
+
+}
+
+

@@ -64,8 +64,8 @@ urlpatterns = [
     path('expenses/<int:pk>/edit/', views.expense_update, name='expense_update'),
     path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
     # Plotly API
-    path('api/expenses/by-category/', views.expense_by_category_api, name='expense_by_category_api'),
-    path('api/expenses/by-month/', views.expense_by_month_api, name='expense_by_month_api'),
+    path('expenses/by-category/', views.expense_by_category_api, name='expense_by_category_api'),
+    path('expenses/by-month/', views.expense_by_month_api, name='expense_by_month_api'),
 
     # Profile
     path('profile/', views.profile_view, name='profile_view'),
@@ -75,5 +75,12 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    #Stripe
+    path('stripe-test/', views.stripe_test_view, name='stripe_test'),
+    path('stripe/create-checkout-session/', views.create_checkout_session,
+         name='create_checkout_session'),
+    path('stripe/success/', views.stripe_success_view, name='stripe_success'),
+    path('stripe/cancel/', views.stripe_cancel_view, name='stripe_cancel'),
 ]
 
