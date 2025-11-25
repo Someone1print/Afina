@@ -64,8 +64,8 @@ urlpatterns = [
     path('expenses/<int:pk>/edit/', views.expense_update, name='expense_update'),
     path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
     # Plotly API
-    path('api/expenses/by-category/', views.expense_by_category_api, name='expense_by_category_api'),
-    path('api/expenses/by-month/', views.expense_by_month_api, name='expense_by_month_api'),
+    path('expenses/by-category/', views.expense_by_category_api, name='expense_by_category_api'),
+    path('expenses/by-month/', views.expense_by_month_api, name='expense_by_month_api'),
 
     # Profile
     path('profile/', views.profile_view, name='profile_view'),
