@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="alert alert-warning" style="margin-top: 30px;">
+    <h2>Оплата отменена ⚠️</h2>
+    <p>Ты отменил оплату на стороне Stripe. Можно попробовать ещё раз.</p>
+    <a href="{% url 'stripe_test' %}" class="btn btn-secondary">Назад к оплате</a>
+  </div>
+{% endblock %}

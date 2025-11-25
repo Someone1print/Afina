@@ -151,6 +151,9 @@ SPECTACULAR_SETTINGS = {
     'SECURITY': [{'BearerAuth': []}],
 }
 
+***REMOVED***
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', 'pk_test_51SXGylHDyrxMN0Jp6uWRtENXFElU8hdTjs146Wp752MChsWIxCoCYFGEHBAshvf8rjE1dGPHLcBWjFXBxmmo0N4A00nWRZLHtR')
+STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_1SXHX8HDyrxMN0JpIklIongA')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
