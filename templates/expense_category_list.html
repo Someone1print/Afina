@@ -1,124 +1,112 @@
 {% extends "base.html" %}
 {% load static %}
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'Style/Expense_Category.css' %}">
-{% endblock %}
+
 {% block title %}Категории расходов — AFINA{% endblock %}
 
-
+{% block extra_css %}
+{# используем тот же стиль, что и для доходов #}
+<link rel="stylesheet" href="{% static 'Style/income_categories.css' %}">
+{% endblock %}
 
 {% block content %}
 
-<section class="page-head container">
-  <div class="page-head__left">
-    <h1 class="page-title">Категории расходов</h1>
-    <span class="badge">всего: {{ categories|length }}</span>
-  </div>
+<section class="icat-page">
 
-  <div class="page-head__right">
-    <a href="{% url 'expense_category_create' %}" class="btn btn-primary">
+  <!-- Заголовок + счётчик + кнопка -->
+  <div class="icat-header">
+    <div class="icat-header-left">
+      <h1 class="icat-title">Категории расходов</h1>
+      <span class="icat-counter">Всего: {{ categories|length }}</span>
+    </div>
+    <a href="{% url 'expense_category_create' %}" class="icat-add-btn">
       + Добавить категорию
     </a>
   </div>
-</section>
 
-<section class="card container">
-  {% if categories %}
-    <div class="table-wrap">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th class="actions">Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in categories %}
-            <tr>
-              <td class="muted">#{{ c.id }}</td>
+  <!-- Карточка со списком -->
+  <div class="icat-card">
+    <table class="icat-table">
+      <thead>
+        <tr>
+          <th class="icat-col-name">Название</th>
+          <th class="icat-col-actions">Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for c in categories %}
+        <tr>
+          <td class="icat-name">{{ c.expenseName }}</td>
+          <td class="icat-actions">
+            {% if c.is_default %}
+              <span class="icat-pill icat-pill--locked">
+                Нельзя изменить
+                <span class="icat-pill-icon" aria-hidden="true">🔒</span>
+              </span>
+            {% else %}
+              <a href="{% url 'expense_category_update' c.id %}"
+                 class="icat-link">Изменить</a>
+              <button type="button"
+                      class="icat-pill icat-pill--danger js-delete"
+                      data-action="{% url 'expense_category_delete' c.id %}">
+                Удалить
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2" class="icat-empty">Категорий пока нет.</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-              <!-- Название категории -->
-              <td class="name">
-                {{ c.expenseName }}
-              </td>
+  {% if is_paginated %}
+  <nav class="icat-pagination">
+    {% if page_obj.has_previous %}
+      <a class="icat-page-btn" href="?page=1">«</a>
+      <a class="icat-page-btn" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+    {% else %}
+      <span class="icat-page-btn icat-page-btn--disabled">«</span>
+      <span class="icat-page-btn icat-page-btn--disabled">Назад</span>
+    {% endif %}
 
-              <!-- Действия -->
-              <td class="actions">
-                  {% if not c.is_default %}
-                    <div class="buttons">
-                      <a href="{% url 'expense_category_update' c.id %}" class="btn btn-small btn-outline">Изменить</a>
-
-                      {# <-- ВАЖНО: ссылка-«кнопка» без href, с классом .js-delete и data-action #}
-                      <a href="#"
-                         class="btn btn-small btn-danger js-delete"
-                         data-action="{% url 'expense_category_delete' c.id %}">
-                        Удалить
-                      </a>
-                    </div>
-                  {% else %}
-                    <span class="pill pill-muted">Нельзя изменить 🔒</span>
-                  {% endif %}
-            </td>
-
-            </tr>
-
-          {% endfor %}
-        </tbody>
-      </table>
-    {% if is_paginated %}
-<nav class="pagination">
-  {% if page_obj.has_previous %}
-    <a class="btn btn-outline btn-small" href="?page=1" aria-label="Первая">«</a>
-    <a class="btn btn-outline btn-small" href="?page={{ page_obj.previous_page_number }}">Назад</a>
-  {% else %}
-    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">«</span>
-    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">Назад</span>
-  {% endif %}
-
-  <ul class="pagination__pages">
-    {# Показываем диапазон -2..+2 вокруг текущей страницы #}
-    {% for num in page_obj.paginator.page_range %}
-      {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
-        {% if num == page_obj.number %}
-          <li><span class="page current">{{ num }}</span></li>
-        {% else %}
-          <li><a class="page" href="?page={{ num }}">{{ num }}</a></li>
+    <ul class="icat-pagination__pages">
+      {% for num in page_obj.paginator.page_range %}
+        {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+          {% if num == page_obj.number %}
+            <li><span class="icat-page-dot icat-page-dot--current">{{ num }}</span></li>
+          {% else %}
+            <li><a class="icat-page-dot" href="?page={{ num }}">{{ num }}</a></li>
+          {% endif %}
         {% endif %}
-      {% endif %}
-    {% endfor %}
-  </ul>
+      {% endfor %}
+    </ul>
 
-  {% if page_obj.has_next %}
-    <a class="btn btn-outline btn-small" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
-    <a class="btn btn-outline btn-small" href="?page={{ paginator.num_pages }}" aria-label="Последняя">»</a>
-  {% else %}
-    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">Вперёд</span>
-    <span class="btn btn-outline btn-small is-disabled" aria-disabled="true">»</span>
+    {% if page_obj.has_next %}
+      <a class="icat-page-btn" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+      <a class="icat-page-btn" href="?page={{ paginator.num_pages }}">»</a>
+    {% else %}
+      <span class="icat-page-btn icat-page-btn--disabled">Вперёд</span>
+      <span class="icat-page-btn icat-page-btn--disabled">»</span>
+    {% endif %}
+  </nav>
   {% endif %}
-</nav>
-{% endif %}
 
-    </div>
-  {% else %}
-    <div class="empty">
-      <h3>Пока нет категорий</h3>
-      <p>Создайте вашу первую категорию, чтобы удобнее учитывать траты.</p>
-      <a href="{% url 'expense_category_create' %}" class="btn btn-primary">Создать категорию</a>
-    </div>
-  {% endif %}
 </section>
-<!-- Модальное окно подтверждения удаления -->
-<div id="confirmModal" class="modal" aria-hidden="true">
-  <div class="modal__overlay"></div>
-  <div class="modal__content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+<!-- Модалка подтверждения удаления -->
+<div id="confirmModal" class="icat-modal" aria-hidden="true">
+  <div class="icat-modal__overlay"></div>
+  <div class="icat-modal__content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <h3 id="modalTitle">Удалить категорию?</h3>
-    <p class="modal__text">Это действие нельзя отменить.</p>
+    <p class="icat-modal__text">Это действие нельзя будет отменить.</p>
     <form id="confirmForm" method="post">
       {% csrf_token %}
-      <div class="modal__actions">
-        <button type="button" class="btn btn-outline" data-close>Отмена</button>
-        <button type="submit" class="btn btn-danger">Удалить</button>
+      <div class="icat-modal__actions">
+        <button type="button" class="icat-btn icat-btn--ghost" data-close>Отмена</button>
+        <button type="submit" class="icat-btn icat-btn--danger">Удалить</button>
       </div>
     </form>
   </div>
@@ -129,20 +117,17 @@
   const modal = document.getElementById('confirmModal');
   const form  = document.getElementById('confirmForm');
 
-  // открыть модалку
   function openModal(action) {
     form.setAttribute('action', action);
-    modal.classList.add('open');
+    modal.classList.add('icat-modal--open');
     document.body.classList.add('no-scroll');
   }
 
-  // закрыть модалку
   function closeModal() {
-    modal.classList.remove('open');
+    modal.classList.remove('icat-modal--open');
     document.body.classList.remove('no-scroll');
   }
 
-  // привязка кнопок
   document.querySelectorAll('.js-delete').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -150,19 +135,17 @@
     });
   });
 
-  // закрытие по клику вне окна или по кнопке «Отмена»
   modal.addEventListener('click', e => {
-    if (e.target === modal || e.target.hasAttribute('data-close')) closeModal();
+    if (e.target.classList.contains('icat-modal__overlay') ||
+        e.target.hasAttribute('data-close')) {
+      closeModal();
+    }
   });
 
-  // закрытие по ESC
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal();
   });
 })();
 </script>
-
-
-
 
 {% endblock %}
