@@ -51,6 +51,7 @@
             <a href="{% url 'income_list' %}" class="user-menu__item">Доходы</a>
             <a href="{% url 'expense_list' %}" class="user-menu__item">Расходы</a>
             <a href="{% url 'stripe_test' %}" class="user-menu__item">Подписка</a>
+              <a href="{% url 'savings_list' %}" class="user-menu__item">Копилка</a>
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
               <button type="submit" class="user-menu__item user-menu__item--danger">
