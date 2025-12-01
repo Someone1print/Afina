@@ -1,0 +1,188 @@
+.savings-page {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.savings-card {
+  background: #f4f8ff;
+  border-radius: 18px;
+  padding: 24px 28px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  margin-bottom: 24px;
+}
+
+.completed-card {
+  background: #f8fff6;
+}
+
+.savings-card__header h2 {
+    color: #1a1a1a;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.savings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.savings-table thead {
+  background: #123c84;
+  color: #fff;
+}
+
+.savings-table th{
+    color: #fff;
+    padding: 12px 16px;
+}
+
+.savings-table td {
+    color: black;
+  padding: 12px 16px;
+}
+
+.savings-table tbody tr:nth-child(every) {
+  background: #ffffff;
+}
+
+.savings-table tbody tr:nth-child(odd) {
+  background: #ffffff;
+}
+
+.savings-table tbody tr:nth-child(even) {
+  background: #eef3ff;
+}
+
+.savings-table th:first-child,
+.savings-table td:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.savings-table th:last-child,
+.savings-table td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 24px 0;
+  color: #7a7f90;
+}
+
+.savings-card__footer {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-main {
+  display: inline-block;
+  padding: 10px 26px;
+  border-radius: 999px;
+  border: none;
+  background: #1e3c88;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-main:hover {
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  margin-left: 12px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid #c6c9d6;
+  text-decoration: none;
+  color: #333;
+  background: #fff;
+}
+
+/* actions menu */
+.actions-cell {
+  width: 50px;
+  text-align: right;
+}
+
+.actions-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.dot-btn {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.actions-menu {
+  position: absolute;
+  right: 0;
+  top: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+  padding: 6px 0;
+  min-width: 140px;
+  display: none;
+  z-index: 10;
+}
+
+.actions-menu.is-open {
+  display: block;
+}
+
+.actions-menu a,
+.actions-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  text-decoration: none;
+  color: #23252d;
+  cursor: pointer;
+}
+
+.actions-menu a:hover,
+.actions-menu button:hover {
+  background: #f2f5ff;
+}
+
+.danger-link {
+  color: #d7263d;
+}
+
+/* form */
+.savings-form .form-group {
+  margin-bottom: 16px;
+}
+
+.savings-form label {
+    color: black;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.savings-form .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .savings-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}

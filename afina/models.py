@@ -123,3 +123,28 @@ class Expense(models.Model):
 
     def _str_(self):
         return f"{self.date}: {self.amount} ({self.category})"
+
+class SavingGoal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saving_goals")
+    title = models.CharField("Цель", max_length=255)
+    target_amount = models.DecimalField("Сумма цели", max_digits=12, decimal_places=2)
+    current_amount = models.DecimalField("Накоплено", max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateField("Дата создания", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Копилка"
+        verbose_name_plural = "Копилки"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} ({self.current_amount}/{self.target_amount})"
+
+    @property
+    def is_completed(self) -> bool:
+        return self.current_amount >= self.target_amount
+
+    @property
+    def progress_percent(self) -> int:
+        if self.target_amount and self.target_amount != 0:
+            return int((self.current_amount / self.target_amount) * 100)
+        return 0

@@ -82,5 +82,10 @@ urlpatterns = [
          name='create_checkout_session'),
     path('stripe/success/', views.stripe_success_view, name='stripe_success'),
     path('stripe/cancel/', views.stripe_cancel_view, name='stripe_cancel'),
+
+    path("savings/", views.savings_list, name="savings_list"),
+    path("savings/new/", views.savings_create, name="savings_create"),
+    path("savings/<int:pk>/edit/", views.savings_update, name="savings_update"),
+    path("savings/<int:pk>/delete/", views.savings_delete, name="savings_delete"),
 ]
 
