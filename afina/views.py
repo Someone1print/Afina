@@ -289,25 +289,48 @@ def expense_delete(request, pk):
     return render(request, 'expense_confirm_delete.html', {'item': item})
 
 
-# -------- Profile (просмотр/редактирование) --------
 @login_required
 def profile_view(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    return render(request, 'profile_view.html', {'profile': profile})
+    return render(request, 'profile_view.html', {
+        'profile': profile,
+    })
+
 
 @login_required
 def profile_edit(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=profile)
-        if form.is_valid():
-            form.save()
-            return redirect('profile_view')
-    else:
-        form = ProfileForm(instance=profile)
-    return render(request, 'profile_form.html', {'form': form, 'title': 'Профиль'})
 
-from django.contrib import messages
+        if form.is_valid():
+            # сначала обновляем User
+            user = request.user
+            user.username = form.cleaned_data["username"]
+            user.email = form.cleaned_data["email"]
+            user.save()
+
+            # потом профиль
+            form.save()
+
+            messages.success(request, "✅ Профиль успешно обновлён.")
+            return redirect('profile_view')
+        else:
+            messages.error(request, "❌ Проверьте правильность заполнения формы.")
+    else:
+        form = ProfileForm(
+            instance=profile,
+            initial={
+                "username": request.user.username,
+                "email": request.user.email,
+            }
+        )
+
+    return render(request, 'profile_form.html', {
+        'form': form,
+        'title': 'Профиль',
+    })
 
 
 def expense_categories_for_user(user):

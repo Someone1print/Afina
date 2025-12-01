@@ -116,10 +116,21 @@ class ExpenseForm(forms.ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
+    # поля пользователя
+    username = forms.CharField(label="Имя пользователя", max_length=150)
+    email = forms.EmailField(label="Email", required=False)
+
     class Meta:
         model = Profile
-        fields = ["full_name", "currency"]
-        # fields = ["full_name", "currency", "avatar"]
+        fields = ["full_name", "currency"]  # только поля из Profile!
+        labels = {
+            "full_name": "ФИО",
+            "currency": "Валюта",
+        }
+        widgets = {
+            "full_name": forms.TextInput(attrs={"class": "p-input-control"}),
+            "currency": forms.Select(attrs={"class": "p-input-control"}),
+        }
 
 class SavingGoalForm(forms.ModelForm):
     class Meta:
