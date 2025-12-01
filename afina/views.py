@@ -398,16 +398,14 @@ def income_by_month_api(request):
 
 @login_required
 def stripe_test_view(request):
-    """
-    Просто страница с кнопкой оплаты.
-    """
     context = {
-        "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
+        "stripe_public_key": settings.STRIPE_PUBLISHABLE_KEY,  # <-- имя такое
     }
     return render(request, "stripe_test.html", context)
 
 
-@csrf_exempt   # ⚠ только для тестов, потом лучше переделать с нормальным CSRF
+
+@csrf_exempt              # у тебя и так стояло — оставим для простоты
 @login_required
 def create_checkout_session(request):
     if request.method != "POST":
@@ -420,7 +418,7 @@ def create_checkout_session(request):
             mode="subscription",
             line_items=[
                 {
-                    "price": settings.STRIPE_PRICE_ID,
+                    "price": settings.STRIPE_PRICE_ID,  # price_xxx из Stripe
                     "quantity": 1,
                 }
             ],
@@ -431,6 +429,7 @@ def create_checkout_session(request):
         )
         return JsonResponse({"id": checkout_session.id})
     except Exception as e:
+        # Чтобы было видно точную ошибку
         return JsonResponse({"error": str(e)}, status=500)
 
 

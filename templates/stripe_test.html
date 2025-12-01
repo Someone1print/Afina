@@ -1,52 +1,132 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/stripe_subscription.css' %}">
+{% endblock %}
+
 {% block content %}
+<div class="subscription-page">
+  <div class="subscription-wrapper">
 
-<div class="stripe-test">
-  <h1>Тест Stripe оплаты</h1>
-  <p>Нажми кнопку, чтобы перейти на тестовую оплату Stripe.</p>
+    <!-- Левая карточка — Бесплатный -->
+    <section class="plan-card">
+      <div class="plan-card-header">
+        <div class="plan-icon">👤</div>
+        <h2 class="plan-title">Бесплатный</h2>
+        <p class="plan-price">0.00 $/мес.</p>
+      </div>
 
-  <button id="checkout-button" class="btn btn-primary">
-    Оплатить Подписку
-  </button>
+      <div class="plan-card-inner">
+        <ul class="plan-features">
+          <li>Базовые функции приложения</li>
+          <li>Просмотр ограниченного контента</li>
+          <li>Стандартная скорость работы</li>
+          <li>Добавление доходов</li>
+          <li>Добавление расходов</li>
+          <li>Отслеживание доходов</li>
+          <li>Отслеживание расходов</li>
+          <li>Вывод графиков</li>
+          <li>Статистика доходов и расходов</li>
+        </ul>
 
-  <p style="margin-top: 10px; font-size: 14px; color: #6b7280;">
-    Используй тестовую карту: <strong>4242 4242 4242 4242</strong>, любая дата в будущем, любой CVC.
-  </p>
+        <p class="plan-status">Сейчас активно</p>
+
+        <div class="plan-footer">
+          <!-- на главную -->
+          <a href="{% url 'home' %}" class="btn btn-free">
+            Начать бесплатно
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Правая карточка — Премиум -->
+    <section class="plan-card">
+      <div class="plan-card-header">
+        <div class="plan-icon">👑</div>
+        <h2 class="plan-title">Премиум</h2>
+        <p class="plan-price">10.00 $/мес.</p>
+      </div>
+
+      <div class="plan-card-inner">
+        <ul class="plan-features">
+          <li>Базовые функции приложения</li>
+          <li>Просмотр расширенного контента</li>
+          <li>Повышенная скорость и приоритетная обработка</li>
+          <li>Копилка / цели накоплений</li>
+          <li>Расширенный анализ доходов и расходов</li>
+          <li>Рекомендации от ИИ</li>
+        </ul>
+
+        <p class="plan-note">
+          В течение года общая сумма списаний составит 120.00 $.
+        </p>
+
+        <div class="plan-footer">
+          <button id="checkout-button" class="btn btn-premium">
+            Купить Премиум
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
 </div>
+
+<!-- Никакого второго футера здесь НЕ добавляем -->
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-  const stripe = Stripe("{{ stripe_publishable_key }}");
+  (function () {
+    // Берём публичный ключ, который пришёл из вьюхи
+    const stripe = Stripe("{{ stripe_public_key|escapejs }}");
+    const btn = document.getElementById("checkout-button");
+    if (!btn) return;
 
-  const checkoutButton = document.getElementById("checkout-button");
-  checkoutButton.addEventListener("click", function () {
-    fetch("{% url 'create_checkout_session' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // тело нам не нужно, цена зашита в Django
-    })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(session) {
-      if (session.error) {
-        alert("Ошибка: " + session.error);
-        return;
-      }
-      return stripe.redirectToCheckout({ sessionId: session.id });
-    })
-    .then(function(result) {
-      if (result && result.error) {
-        alert(result.error.message);
-      }
-    })
-    .catch(function(error) {
-      console.error("Error:", error);
-      alert("Что-то пошло не так. Смотри консоль браузера.");
+    btn.addEventListener("click", function () {
+      fetch("{% url 'create_checkout_session' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      })
+        .then(async (response) => {
+          const text = await response.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            console.error("Ответ не JSON:", text);
+            alert("Ошибка сервера (не JSON). Смотри консоль.");
+            throw e;
+          }
+
+          if (!response.ok) {
+            console.error("Stripe backend error:", data);
+            alert("Ошибка Stripe: " + (data.error || response.status));
+            throw new Error(data.error || "Backend error");
+          }
+
+          if (!data.id) {
+            console.error("Нет session id в ответе:", data);
+            alert("Сервер не вернул session_id.");
+            throw new Error("No session id");
+          }
+
+          return stripe.redirectToCheckout({ sessionId: data.id });
+        })
+        .then(function (result) {
+          if (result && result.error) {
+            alert(result.error.message);
+          }
+        })
+        .catch(function (error) {
+          console.error("Global error:", error);
+        });
     });
-  });
+  })();
 </script>
 
 {% endblock %}

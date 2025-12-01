@@ -1,8 +1,28 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оплата не завершена — AFINA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/stripe_subscription.css' %}">
+{% endblock %}
+
 {% block content %}
-  <div class="alert alert-warning" style="margin-top: 30px;">
-    <h2>Оплата отменена ⚠️</h2>
-    <p>Ты отменил оплату на стороне Stripe. Можно попробовать ещё раз.</p>
-    <a href="{% url 'stripe_test' %}" class="btn btn-secondary">Назад к оплате</a>
+<section class="payment-status-page">
+  <div class="payment-status-card">
+    <div class="payment-status-icon payment-status-icon-error">
+      !
+    </div>
+
+    <h1 class="payment-status-title">Оплата не завершена</h1>
+
+    <p class="payment-status-text">
+      Платёж был отменён. Вы можете повторить попытку, когда будете готовы.
+    </p>
+
+    <a href="{% url 'stripe_test' %}" class="tariff-btn premium-btn payment-status-btn">
+      Вернуться к выбору тарифа
+    </a>
   </div>
+</section>
 {% endblock %}
