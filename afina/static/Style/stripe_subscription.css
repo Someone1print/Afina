@@ -1,7 +1,6 @@
 /* Фон страницы подписки */
 .subscription-page {
   min-height: calc(100vh - 120px); /* примерно без учёта шапки/футера */
-  background: linear-gradient(180deg, #223D77 0%, #0F1A34 100%);
   display: flex;
   justify-content: center;
   padding: 60px 0 80px;

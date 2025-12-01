@@ -1,124 +1,515 @@
-/* ===== Заголовок и кнопка сверху ===== */
-h2 {
-    font-weight: 700;
-    margin-bottom: 16px;
+/* ===== Страница доходов ===== */
+
+.income-page {
+  margin: 40px auto 32px;
+  max-width: 1160px;
+  padding: 0 16px;
 }
 
-.btn-primary {
-    border-radius: 12px;
-    padding: 8px 18px;
-    font-weight: 600;
+.income-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(6, 10, 31, 0.4);
+  padding: 22px 24px 18px;
 }
 
-/* ===== Фильтры (даты + кнопки) ===== */
-form.row {
-    margin-bottom: 24px !important;
+/* Заголовок */
+.income-card__header {
+  margin-bottom: 10px;
 }
 
-form.row input.form-control {
-    min-width: 170px;
+.income-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #223d77;
+  margin: 0 0 8px;
 }
 
-form.row .btn {
-    border-radius: 10px;
-    padding: 6px 14px;
+/* Таблица */
+.income-card__table {
+  margin-top: 6px;
 }
 
-/* ===== Таблица доходов ===== */
-table.table {
-    background: #ffffff;
-    border-radius: 18px 18px 0 0;
-    overflow: hidden;
-    margin-top: 10px;
+.income-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
 }
 
-table thead {
-    background-color: #f5f7fb;
+.income-table thead th {
+  background: #f5f8ff;
+  color: #0f1a33;
+  padding: 14px 18px;
+  font-weight: 700;
+  font-size: 14px;
+  border-bottom: 2px solid #1d3770;
 }
 
-table thead th {
-    color: #000;
-    font-weight: 600;
-    padding: 14px 12px;
+.income-table tbody td {
+  padding: 18px 18px;
+  border-bottom: 1px solid #eef0f6;
+  font-size: 14px;
+  color: #0f1a33;
 }
 
-table tbody tr {
-    background: #ffffff;
+.income-table tbody tr:hover {
+  background: #fafbff;
 }
 
-table tbody tr:nth-child(odd) {
-    background-color: #f9fbff;
+.income-table .empty-row {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
 }
 
-table tbody td {
-    color: #000;
-    vertical-align: middle;
-    padding: 12px 12px;
+/* Колонка с действиями */
+.col-actions {
+  width: 60px;
+  text-align: right;
 }
 
-/* ===== Кнопки действий ===== */
-.btn-warning,
-.btn-danger {
-    border-radius: 999px;
-    font-size: 0.9rem;
-    padding: 4px 14px;
+/* Трёхточие + выпадающее меню */
+.row-actions {
+  position: relative;
+  display: inline-block;
+}
+
+.actions-toggle {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #64748b;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.actions-toggle:hover {
+  background: #eef2ff;
+  color: #223d77;
+}
+
+/* Меню показываем по фокусу внутри блока row-actions */
+.row-actions:focus-within .actions-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.actions-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 170px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(15, 25, 49, 0.35);
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  z-index: 20;
+}
+
+.actions-item {
+  display: block;
+  padding: 8px 14px;
+  font-size: 14px;
+  text-decoration: none;
+  color: #0f1a33;
+  transition: background 0.15s, color 0.15s;
+}
+
+.actions-item:hover {
+  background: #f3f7ff;
+}
+
+.actions-edit {
+  color: #0f1a33;
+}
+
+.actions-delete {
+  color: #b91c1c;
 }
 
 /* ===== Пагинация ===== */
-nav[aria-label="Навигация по страницам"] {
-    background-color: #ffffff;
-    padding: 12px 16px;
-    border-radius: 0 0 18px 18px;
-    margin-bottom: 32px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+.income-pagination {
+  margin-top: 14px;
+  margin-bottom: 8px;
 }
 
-.pagination .page-link {
-    border-radius: 999px !important;
-    background-color: #ffffff;
-    border: 1px solid #d0d7e2;
-    color: #1c274c;
-    padding: 6px 12px;
+.income-pagination .pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.pagination .page-item.active .page-link {
-    background-color: #1c274c;
-    border-color: #1c274c;
-    color: white;
+.income-pagination .page-link {
+  border-radius: 999px;
+  border: 1px solid #d0d7e2;
+  background: #ffffff;
+  color: #1c274c;
+  padding: 6px 12px;
+  font-weight: 500;
+  font-size: 14px;
 }
 
-.pagination .page-item.disabled .page-link {
-    background-color: #f1f1f1;
-    border-color: #dcdcdc;
-    color: #8a8a8a;
+.income-pagination .page-item.active .page-link {
+  background: #223d77;
+  border-color: #223d77;
+  color: #ffffff;
 }
 
-/* ===== Карточки с графиками (если есть) ===== */
-.card {
-    border-radius: 18px;
-    border: none;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.income-pagination .page-item.disabled .page-link {
+  background: #f1f1f1;
+  border-color: #dcdcdc;
+  color: #8a8a8a;
 }
 
-.card-body {
-    background-color: #ffffff !important;
+/* ===== Нижняя панель (Выбрать период + кнопка Добавить доход) ===== */
+
+.income-card__footer {
+  margin-top: 10px;
+  padding: 10px 16px 8px;
+  border-radius: 12px;
+  background: #f1f3fb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.card-title {
-    color: #000 !important;
-    font-weight: 600;
+/* Левая часть – выбор периода */
+.period-form {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-/* ===== Отступ снизу ===== */
-.container {
-    padding-bottom: 60px;
+.period-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #0f1a33;
 }
+
+.period-icon {
+  font-size: 18px;
+}
+
+.period-fields {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.period-fields input[type="date"] {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+}
+
+.btn-period-apply,
+.btn-period-reset {
+  border-radius: 999px;
+  border: none;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-period-apply {
+  background: #223d77;
+  color: #ffffff;
+}
+
+.btn-period-apply:hover {
+  background: #1c3066;
+}
+
+.btn-period-reset {
+  background: transparent;
+  color: #475569;
+}
+
+/* Правая часть – кнопка "Добавить доход" */
+
+.btn-add-income {
+  background: #223d77;
+  color: #ffffff;
+  padding: 10px 26px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 15px;
+  box-shadow: 0 10px 22px rgba(18, 34, 82, 0.5);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.btn-add-income:hover {
+  background: #1b2f63;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(13, 27, 68, 0.7);
+}
+
+/* ===== Блок с графиками ===== */
+
 .chart-row {
-    display: block;
-    width: 100%;
-}
-.chart-row > div {
-    width: 100%;         /* каждый занимает всю ширину */
-    margin-bottom: 30px;          /* чтобы обе карточки были одинаковой ширины */
+  max-width: 1160px;
+  margin: 24px auto 40px;
+  display: flex;
+  gap: 30px;
 }
 
+.chart-row > div {
+  flex: 1;
+}
+
+/* ====== Панель "Выбрать период" ====== */
+
+.period-bar {
+  margin: 16px 0 12px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.period-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1.5px solid #c7d2fe;
+  background: #f5f7ff;
+  color: #223d77;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.period-trigger__icon {
+  font-size: 16px;
+}
+
+.period-trigger__chevron {
+  margin-left: 4px;
+  font-size: 14px;
+}
+
+.period-trigger:hover {
+  background: #e4e9ff;
+  box-shadow: 0 4px 10px rgba(15, 25, 49, .18);
+  transform: translateY(-1px);
+}
+
+/* ====== Модалка выбора периода ====== */
+/* Опираемся на твои уже существующие .modal/.modal__overlay/.modal__content */
+
+.period-modal__content {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 22px 22px 18px;
+  max-width: 520px;
+}
+
+.period-modal__header {
+  margin-bottom: 14px;
+}
+
+.period-modal__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f1a33;
+}
+
+/* Даты */
+.period-modal__dates {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.period-date {
+  flex: 1;
+}
+
+.period-date__label {
+  display: block;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.period-date__input-wrap {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #f4f6ff;
+  border: 1px solid #dde3ff;
+}
+
+.period-date__input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #111827;
+}
+
+.period-date__input:focus {
+  outline: none;
+}
+
+/* Быстрые периоды */
+.period-modal__quick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.period-quick-btn {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 14px;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.period-quick-btn:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+/* Кнопки внизу модалки */
+.period-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.period-modal__btn {
+  min-width: 110px;
+}
+/* контейнер с кнопкой "..." и меню */
+.row-actions {
+    position: relative;
+    display: inline-block;
+}
+
+/* кнопка с тремя точками */
+.row-actions__toggle {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 18px;
+    line-height: 1;
+    color: #6b7280;
+    border-radius: 999px;
+    transition: background 0.15s ease;
+}
+
+.row-actions__toggle:hover {
+    background: rgba(148, 163, 184, 0.18);
+}
+
+/* само меню */
+.row-menu {
+    position: absolute;
+    right: 0;
+    top: 110%;
+    min-width: 170px;
+
+    background: #f5f7fb;                /* лёгкий серый фон вокруг */
+    padding: 4px;
+    border-radius: 18px;
+    box-shadow: 0 18px 35px rgba(15, 23, 42, 0.25);
+    border: 1px solid #e5e9f6;
+
+    display: none;                      /* по умолчанию скрыто */
+    z-index: 50;
+}
+
+/* показываем, когда на контейнере есть класс .open */
+.row-actions.open .row-menu {
+    display: block;
+}
+
+/* отдельный пункт меню */
+.row-menu__item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: #ffffff;
+    border: none;
+    border-radius: 14px;
+
+    padding: 10px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    cursor: pointer;
+    text-align: left;
+
+    transition: background 0.15s ease, transform 0.08s ease,
+                box-shadow 0.15s ease;
+}
+
+/* расстояние между строками */
+.row-menu__item + .row-menu__item {
+    margin-top: 6px;
+}
+
+/* иконка слева */
+.row-menu__icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #6b7280;
+}
+
+/* текст */
+.row-menu__text {
+    flex: 1;
+}
+
+/* наведение как в фигме */
+.row-menu__item:hover {
+    background: #f3f7ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+}
+
+/* пункт "Удалить" — красный текст */
+.row-menu__item--delete .row-menu__text {
+    color: #b91c1c;
+}
+
+.row-menu__item--delete:hover {
+    background: #fee2e2;
+}

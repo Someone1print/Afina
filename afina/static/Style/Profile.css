@@ -1,108 +1,282 @@
-/* Карточка */
-.p-card{
-  background:#fff;
-  border-radius:16px;
-  padding:28px;
-  box-shadow:0 8px 24px rgba(0,0,0,.10);
-  margin:24px auto 0;
-  width:100%;
-  max-width:900px;
+/* ===== Карточка профиля ===== */
+
+.p-card {
+    max-width: 980px;
+    margin: 72px auto 72px;            /* отступ сверху/снизу */
+    padding: 32px 40px 32px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(5, 12, 32, 0.35);
 }
 
-/* Шапка */
-.p-head{
-  display:flex;
-  align-items:center;
-  gap:16px;
-  padding-bottom:16px;
-  border-bottom:1px solid #e9eef9;
-}
-.p-head h1{
-  margin:0;
-  color:#223d77;
-  font-size:28px;
-  font-weight:800;
-}
-.p-sub{ color:#6b7280; margin-top:2px; }
+/* ===== Шапка: аватар + заголовок ===== */
 
-/* Аватар-инициал */
-.p-avatar{
-  width:56px;height:56px;border-radius:50%;
-  display:grid;place-items:center;
-  font-weight:800;font-size:22px;
-  color:#fff;background:#223d77;
+.p-head {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e3e7f3;
+    padding-bottom: 20px;
 }
 
-/* Сетка ключ-значение */
-.p-grid{
-  display:grid;
-  grid-template-columns: 220px 1fr;
-  row-gap:14px; column-gap:18px;
-  margin-top:18px;
-}
-.p-item{ display:contents; } /* чтобы key/val легли в одну строку */
-.p-key{
-  color:#6b7280;
-  font-weight:700;
-}
-.p-val{
-  color:#1b2437;
-  font-weight:600;
+.p-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: #223d77;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Бейдж валюты */
-.p-badge{
-  display:inline-block;
-  padding:6px 10px;
-  border-radius:8px;
-  background:#eef3ff;
-  color:#223d77;
-  font-weight:800;
-  letter-spacing:.4px;
+.p-head h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #223d77;
+    margin: 0 0 4px;
 }
 
-/* Кнопки под блоком */
-.p-actions{
-  margin-top:22px;
-  display:flex; gap:10px; flex-wrap:wrap;
+.p-sub {
+    margin: 0;
+    font-size: 15px;
+    color: #6b7280;
 }
 
-/* Форма редактирования */
-.p-form{
-  margin-top:18px;
-  display:flex; flex-direction:column; gap:12px;
-}
-.p-form label{ font-weight:700; color:#223d77; }
-.p-form input[type="text"],
-.p-form input[type="email"],
-.p-form select,
-.p-form textarea{
-  width:100%;
-  padding:10px 14px;
-  border:1px solid #ccd3e6;
-  border-radius:8px;
-  font-size:15px;
-  transition:.2s;
-}
-.p-form input:focus,
-.p-form select:focus,
-.p-form textarea:focus{
-  outline:none;
-  border-color:#223d77;
-  box-shadow:0 0 0 2px rgba(34,61,119,.18);
+/* ===== Сетка с данными ===== */
+
+.p-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 14px;
+    column-gap: 40px;
 }
 
-/* Локальные кнопки */
-.btn{ display:inline-block; padding:10px 18px; border-radius:8px;
-  font-weight:600; text-decoration:none; border:none; cursor:pointer; transition:.2s;
+.p-item {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
 }
-.btn-primary{ background:#223d77; color:#fff; }
-.btn-primary:hover{ background:#1c3066; }
-.btn-secondary{ background:#6b7280; color:#fff; }
-.btn-secondary:hover{ background:#565d69; }
 
-/* Адаптив */
-@media (max-width:700px){
-  .p-grid{ grid-template-columns: 1fr; }
-  .p-key{ margin-top:8px; }
+.p-key {
+    min-width: 190px;                  /* “Пользователь / ФИО / Валюта…” */
+    font-size: 15px;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.p-val {
+    font-size: 16px;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* бейдж для валюты */
+.p-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 14px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #223d77;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* ===== Кнопка действий ===== */
+
+.p-actions {
+    margin-top: 28px;
+}
+
+.p-actions .btn-primary {
+    padding: 10px 26px;
+    border-radius: 10px;
+    background: #223d77;
+    border: none;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.p-actions .btn-primary:hover {
+    background: #1a2f63;
+}
+
+/* ===== Адаптив ===== */
+
+@media (max-width: 768px) {
+    .p-card {
+        margin: 40px 16px 56px;
+        padding: 24px 20px;
+    }
+
+    .p-head {
+        gap: 16px;
+    }
+
+    .p-avatar {
+        width: 72px;
+        height: 72px;
+        font-size: 30px;
+    }
+
+    .p-head h1 {
+        font-size: 26px;
+    }
+
+    .p-grid {
+        row-gap: 10px;
+    }
+
+    .p-key {
+        min-width: 150px;
+        font-size: 14px;
+    }
+
+    .p-val {
+        font-size: 15px;
+    }
+}
+
+/* ====== Редактирование профиля ====== */
+
+.p-card-edit {
+  max-width: 720px;
+  margin: 40px auto 60px;
+  background: #f4f7fc;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(15, 25, 49, 0.25);
+  padding: 28px 32px 30px;
+}
+
+/* сетка формы */
+.p-form-edit {
+  margin-top: 20px;
+}
+
+.p-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.p-form-row {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 20px;
+}
+
+/* подписи слева */
+.p-label {
+  font-weight: 600;
+  color: #1b2553;
+  font-size: 15px;
+}
+
+/* обёртка для инпута */
+.p-input-wrap {
+  background: #eef2fa;
+  border-radius: 10px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* стили самих инпутов формы */
+.p-input-wrap input,
+.p-input-wrap select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  padding: 6px 0;
+  outline: none;
+  color: #111827;
+}
+
+/* пароль + иконка */
+.p-input-password {
+  position: relative;
+}
+
+.p-pass-toggle {
+  font-size: 16px;
+  margin-left: 8px;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+/* кнопка "Изменить метод оплаты" внутри строки */
+.p-pay-btn {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-weight: 600;
+  font-size: 15px;
+  color: #1c3066;
+}
+.p-pay-btn:hover{
+    cursor: pointer;
+}
+/* блок с кнопками снизу */
+.p-edit-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.p-btn-wide {
+  flex: 1;
+  padding: 12px 0;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* общий вид вторичной кнопки */
+.btn-secondary {
+  background: #6c7684;
+  color: #fff;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: #5a6471;
+}
+
+/* алерт */
+.p-alert {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #e5f0ff;
+  color: #1b2553;
+  font-size: 14px;
+}
+
+/* адаптив */
+@media (max-width: 640px) {
+  .p-card-edit {
+    padding: 20px 18px 24px;
+  }
+
+  .p-form-row {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+
+  .p-label {
+    font-size: 14px;
+  }
+
+  .p-edit-actions {
+    flex-direction: column;
+  }
 }

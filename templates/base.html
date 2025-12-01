@@ -50,7 +50,7 @@
             <a href="{% url 'expense_category_list' %}" class="user-menu__item">Категории расходов</a>
             <a href="{% url 'income_list' %}" class="user-menu__item">Доходы</a>
             <a href="{% url 'expense_list' %}" class="user-menu__item">Расходы</a>
-            <a href="#" class="user-menu__item">Подписка</a> {# TODO: сюда потом поставишь {% url '...' %} #}
+            <a href="{% url 'stripe_test' %}" class="user-menu__item">Подписка</a>
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
               <button type="submit" class="user-menu__item user-menu__item--danger">

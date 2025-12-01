@@ -7,28 +7,69 @@
 {% endblock %}
 
 {% block content %}
-<section class="p-card">
+<section class="p-card p-card-edit">
+
+  <!-- Шапка, как в просмотре профиля -->
   <div class="p-head">
     <div class="p-avatar">{{ request.user.username|first|upper }}</div>
     <div>
-      <h1>Редактирование профиля</h1>
-      <p class="p-sub">Пользователь: <strong>{{ request.user.username }}</strong></p>
+      <h1>Профиль</h1>
+      <p class="p-sub">Вы вошли как <strong>{{ request.user.username }}</strong></p>
     </div>
   </div>
 
   {% if messages %}
-    <div class="alert alert-info">
-      {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+    <div class="p-alert">
+      {% for m in messages %}
+        <p>{{ m }}</p>
+      {% endfor %}
     </div>
   {% endif %}
 
-  <form method="post" class="p-form">
+  <form method="post" class="p-form" autocomplete="off">
     {% csrf_token %}
-    {{ form.as_p }}
-    <div class="p-actions">
-      <button type="submit" class="btn btn-primary">Сохранить</button>
-      <a href="{% url 'profile_view' %}" class="btn btn-secondary">Отмена</a>
+
+    <!-- Имя пользователя -->
+    <label class="p-label">Имя пользователя</label>
+    <div class="p-input">{{ form.username }}
+        <input type="text">
     </div>
-  </form>
+
+    <!-- Email -->
+    <label class="p-label">Email</label>
+    <div class="p-input">{{ form.email }}
+        <input type="text">
+    </div>
+      
+
+    <!-- Пароль -->
+    <label class="p-label">Пароль</label>
+    <div class="p-input p-pass-wrapper">
+        {{ form.password }}
+
+        <input type="password">
+    </div>
+
+    <!-- Валюта -->
+    <label class="p-label">Валюта</label>
+    <div class="p-input">{{ form.currency }}</div>
+
+    <!-- Оплата -->
+    <label class="p-label">Оплата</label>
+    <button class="p-pay-btn" type="button">Изменить метод оплаты</button>
+
+    <!-- Кнопки -->
+    <div class="p-actions mt-3">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{% url 'profile_view' %}" class="btn btn-secondary">Выход</a>
+    </div>
+</form>
+
 </section>
+<script>
+function togglePass() {
+    let input = document.getElementById("id_password");
+    input.type = (input.type === "password") ? "text" : "password";
+}
+</script>
 {% endblock %}
