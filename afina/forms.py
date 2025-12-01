@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
+from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal
 from datetime import date
 from django.db.models import Q
 
@@ -120,3 +120,18 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ["full_name", "currency"]
         # fields = ["full_name", "currency", "avatar"]
+
+class SavingGoalForm(forms.ModelForm):
+    class Meta:
+        model = SavingGoal
+        fields = ["title", "target_amount", "current_amount"]
+        labels = {
+            "title": "Цель",
+            "target_amount": "Сумма цели (KGS)",
+            "current_amount": "Уже накоплено (KGS)",
+        }
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "target_amount": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "current_amount": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+        }
