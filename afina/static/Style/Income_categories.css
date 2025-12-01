@@ -1,91 +1,332 @@
-/* Карточка страницы */
-.icard {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
-  margin: 24px auto 0;
-  width: 100%;
-  max-width: 1200px;
+/* Контейнер страницы: выравниваем по центру, как в макете */
+.icat-page {
+  max-width: 1160px;
+  margin: 40px auto 64px;
+  padding: 0 16px;
 }
 
-/* Верхняя панель */
-.icard__topbar {
+/* Верхняя линия: заголовок + счетчик + кнопка */
+.icat-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e9eef9;
-}
-.icard__topbar h1 {
-  margin: 0;
-  color: #223d77;
-  font-size: 28px;
-  font-weight: 800;
-}
-.icard__actions {
-  display: flex;
-  gap: 10px;
-}
-
-/* Таблица */
-.itable { margin-top: 16px; }
-
-/* белая шапка таблицы + акцентный текст */
-.table--clean {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.table--clean thead {
-  background: #fff;
-  color: #223d77;
-  border-bottom: 2px solid #223d77;
-}
-.table--clean th,
-.table--clean td {
-  padding: 14px 16px;
-  color: #1a1a1a;
-}
-.table--clean tbody tr:hover {
-  background: #f8fbff;
-}
-
-/* колонка действий */
-.col-actions { width: 220px; }
-.actions {
-  display: flex;
-  gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
-/* Кнопки-утилиты для этой страницы (дополняют General.css) */
-.btn-secondary {
-  background-color: #6b7280;
-  color: #fff;
+.icat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.btn-secondary:hover {
-  background-color: #565d69;
+
+.icat-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: #f9fafb;          /* белый текст на темно-синем фоне */
 }
-.btn-sm {
-  padding: 8px 12px;
+
+/* бейдж "Всего: 5" */
+.icat-counter {
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #223d77;
   font-size: 14px;
-  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* Кнопка "+ Добавить категорию" справа */
+.icat-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: #223d77;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.35);
+  transition: background 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.icat-add-btn:hover {
+  background: #1a2f5e;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.45);
+}
+
+/* Светлая карточка под заголовком */
+.icat-card {
+  background: #ecf1fa;
+  border-radius: 24px;
+  padding: 18px 24px 24px;
+  box-shadow: 0 24px 56px rgba(3, 10, 26, 0.55);
+}
+
+/* Таблица внутри карточки */
+.icat-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ecf1fa;
+}
+
+/* Шапка таблицы – темно-синий бар с закруглениями */
+.icat-table thead tr {
+  background: #223d77;
+}
+
+.icat-table thead th {
+  padding: 14px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  border-bottom: 0;
+}
+
+.icat-col-name {
+  text-align: left;
+}
+
+.icat-col-actions {
+  text-align: right;
+  width: 220px;
+}
+
+/* Строки таблицы */
+.icat-table tbody tr {
+  background: transparent;
+  border-bottom: 1px solid #dde3f4;
+}
+
+.icat-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.icat-table tbody tr:nth-child(2n) {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.icat-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.icat-table td {
+  padding: 12px 22px;
+  font-size: 15px;
+}
+
+/* Название категории слева */
+.icat-name {
+  font-weight: 600;
+  color: #16325c;
+}
+
+/* Правый столбец */
+.icat-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Плашки и кнопки в действиях */
+.icat-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+}
+
+.icat-pill--locked {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.icat-pill--danger {
+  background: #ef4444;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.icat-pill--danger:hover {
+  background: #dc2626;
+}
+
+.icat-pill-icon {
+  font-size: 14px;
+}
+
+/* Ссылка "Изменить" для не-дефолтных категорий */
+.icat-link {
+  font-size: 13px;
+  margin-right: 10px;
+  color: #1f2937;
+  text-decoration: underline;
 }
 
 /* Пустое состояние */
-.empty {
+.icat-empty {
   text-align: center;
-  padding: 40px 0 16px;
+  padding: 32px 0 12px;
+  font-size: 15px;
   color: #6b7280;
 }
-.empty .btn { margin-top: 12px; }
+
+/* Пагинация (если нужна) */
+.icat-pagination {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.icat-page-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 13px;
+  text-decoration: none;
+  color: #111827;
+}
+
+.icat-page-btn--disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.icat-pagination__pages {
+  display: flex;
+  list-style: none;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+}
+
+.icat-page-dot,
+.icat-page-dot--current {
+  min-width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.icat-page-dot {
+  background: #111827;
+  color: #e5e7eb;
+  text-decoration: none;
+}
+
+.icat-page-dot--current {
+  background: #ffffff;
+  color: #111827;
+}
+
+/* Модалка */
+.icat-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.icat-modal--open {
+  display: block;
+}
+
+.icat-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.icat-modal__content {
+  position: relative;
+  max-width: 420px;
+  margin: 140px auto 0;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 20px 22px 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
+}
+
+.icat-modal__content h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.icat-modal__text {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.icat-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Кнопки в модалке */
+.icat-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.icat-btn--ghost {
+  background: #ffffff;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.icat-btn--danger {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.icat-btn--danger:hover {
+  background: #dc2626;
+}
 
 /* Адаптив */
-@media (max-width: 820px) {
-  .icard__topbar { flex-direction: column; align-items: stretch; }
-  .icard__actions { justify-content: flex-start; }
-  .col-actions { width: 160px; }
+@media (max-width: 768px) {
+  .icat-page {
+    margin-top: 24px;
+  }
+
+  .icat-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .icat-card {
+    padding: 14px 12px 18px;
+    border-radius: 18px;
+  }
+
+  .icat-table td,
+  .icat-table th {
+    padding: 10px 12px;
+  }
 }
