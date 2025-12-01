@@ -18,8 +18,8 @@
     // чтобы клик внутри меню не закрывал сразу
     const menu = userLi.querySelector('.user-menu');
     if (menu) {
-      menu.addEventListener('click', function (e) {
-        e.stopPropagation();
-      });
+        menu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
     }
   })();
