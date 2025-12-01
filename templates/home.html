@@ -5,6 +5,10 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'Style/Home.css' %}">
+
+{% if user.is_authenticated %}
+<link rel="stylesheet" href="{% static 'Style/dashboard_charts.css' %}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -13,20 +17,19 @@
 <section class="home-hero">
   <div class="home-hero__inner container">
     <div class="home-hero__content">
-      <h1 class="home-hero__title">Мы заботимся о ваших финансах</h1>
+      <h1 class="home-hero__title">
+        {% if user.is_authenticated %}Привет, {{ user.username }}!{% else %}Мы заботимся о ваших финансах{% endif %}
+      </h1>
       <p class="home-hero__text">
-        Афина помогает эффективно управлять доходами, отслеживать расходы и достигать финансовых целей.
+        {% if user.is_authenticated %}
+          Вот ваши финансы на сегодня
+        {% else %}
+          Афина помогает эффективно управлять доходами, отслечивать расходы и достигать финансовых целей.
+        {% endif %}
       </p>
-      <div class="home-hero__actions">
-        <a class="btn home-hero__btn" href="{% url 'income_category_list' %}">Перейти к категориям доходов</a>
-      </div>
     </div>
-
     <div class="home-hero__media">
-      <img
-        class="home-hero__img"
-        src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80"
-        alt="Финансовое планирование">
+      <img class="home-hero__img" src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80" alt="Финансы">
     </div>
   </div>
 </section>
@@ -35,35 +38,83 @@
 <section class="home-features">
   <div class="container">
     <h2 class="home-section-title">Наши преимущества</h2>
-
     <div class="home-features__grid">
       <article class="card home-card">
-        <img class="home-card__icon" src="{% static 'afina/images/icon1.png' %}" alt="Управление доходами">
+        <img class="home-card__icon" src="{% static 'afina/images/icon1.png' %}" alt="">
         <h3 class="home-card__title">Управление доходами</h3>
         <p class="home-card__text">Легко отслеживайте и категоризируйте все ваши источники дохода.</p>
       </article>
-
       <article class="card home-card">
-        <img class="home-card__icon" src="{% static 'afina/images/icon2.png' %}" alt="Аналитика расходов">
+        <img class="home-card__icon" src="{% static 'afina/images/icon2.png' %}" alt="">
         <h3 class="home-card__title">Аналитика расходов</h3>
         <p class="home-card__text">Получайте детальные отчёты о тратах и находите возможности для экономии.</p>
       </article>
-
       <article class="card home-card">
-        <img class="home-card__icon" src="{% static 'afina/images/icon3.png' %}" alt="Финансовые цели">
+        <img class="home-card__icon" src="{% static 'afina/images/icon3.png' %}" alt="">
         <h3 class="home-card__title">Финансовые цели</h3>
-        <p class="home-card__text">Ставьте цели и отслеживайте прогресс их достижения.</p>
+        <p class="home-card__text">Ставьте цели и следите за прогрессом их достижения.</p>
       </article>
     </div>
   </div>
 </section>
 
-<!-- CTA (по желанию) -->
+<!-- ====================== РАСХОДЫ ====================== -->
+{% if user.is_authenticated %}
+<section class="dashboard-section">
+  <div class="dashboard-card">
+    <h2 class="dashboard-title">Аналитика расходов</h2>
+
+    <div class="charts-grid">
+      <div class="chart-box">
+        <h3>Расходы по дням недели</h3>
+        <div id="expenses-by-day-chart"></div>
+      </div>
+
+      <div class="chart-box">
+        <h3>Расходы по категориям<br><small>(текущий месяц)</small></h3>
+        <div id="expenses-by-category-chart"></div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ====================== ДОХОДЫ ====================== -->
+{% if user.is_authenticated %}
+<section class="dashboard-section">
+  <div class="dashboard-card">
+    <h2 class="dashboard-title income">Аналитика доходов</h2>
+
+    <div class="charts-grid">
+      <div class="chart-box">
+        <h3>Доходы по дням недели</h3>
+        <div id="income-by-day-chart"></div>
+      </div>
+
+      <div class="chart-box">
+        <h3>Доходы по категориям<br><small>(текущий месяц)</small></h3>
+        <div id="income-by-category-chart"></div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
 <section class="home-cta">
   <div class="container home-cta__inner">
-    <h3 class="home-cta__title">Готовы навести порядок в финансах?</h3>
+    <h3 class="home-cta__title">
+      {% if user.is_authenticated %}Готовы к полному контролю над финансами?{% else %}Готовы навести порядок в финансах?{% endif %}
+    </h3>
     <a class="btn home-cta__btn" href="{% url 'profile_view' %}">Перейти в профиль</a>
   </div>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+{% if user.is_authenticated %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'js/dashboard_charts.js' %}"></script>
+{% endif %}
 {% endblock %}

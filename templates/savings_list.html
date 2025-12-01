@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Копилка — AFINA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/savings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="savings-page container">
+
+  <!-- АКТИВНЫЕ КОПИЛКИ -->
+  <div class="savings-card">
+    <div class="savings-card__header">
+      <h2>Копилка</h2>
+    </div>
+
+    <div class="savings-card__body">
+      <table class="savings-table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Цель</th>
+            <th>Сумма</th>
+            <th>Накоплено</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% if active_goals %}
+          {% for g in active_goals %}
+          <tr>
+            <td>{{ g.created_at|date:"M. d, Y" }}</td>
+            <td>{{ g.title }}</td>
+            <td>{{ g.target_amount }} KGS</td>
+            <td>{{ g.current_amount }} KGS ({{ g.progress_percent }}%)</td>
+            <td class="actions-cell">
+              <div class="actions-wrapper">
+                <button type="button"
+                        class="dot-btn"
+                        onclick="toggleMenu('menu-{{ g.id }}')">⋮</button>
+                <div class="actions-menu" id="menu-{{ g.id }}">
+                  <a href="{% url 'savings_update' g.id %}">Изменить</a>
+                  <form action="{% url 'savings_delete' g.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="danger-link">Удалить</button>
+                  </form>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="empty-cell">Пока нет целей. Добавьте первую  👇</td>
+          </tr>
+        {% endif %}
+        </tbody>
+      </table>
+
+      <div class="savings-card__footer">
+        <a href="{% url 'savings_create' %}" class="btn-main">Добавить цель</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- УЖЕ НАКОПЛЕНО -->
+  {% if completed_goals %}
+  <div class="savings-card completed-card">
+    <div class="savings-card__header">
+      <h2>Уже накоплено</h2>
+    </div>
+
+    <div class="savings-card__body">
+      <table class="savings-table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Цель</th>
+            <th>Сумма</th>
+            <th>Накоплено</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for g in completed_goals %}
+          <tr>
+            <td>{{ g.created_at|date:"M. d, Y" }}</td>
+            <td>{{ g.title }}</td>
+            <td>{{ g.target_amount }} KGS</td>
+            <td>{{ g.current_amount }} KGS ({{ g.progress_percent }}%)</td>
+            <td class="actions-cell">
+              <div class="actions-wrapper">
+                <button type="button"
+                        class="dot-btn"
+                        onclick="toggleMenu('menu-completed-{{ g.id }}')">⋮</button>
+                <div class="actions-menu" id="menu-completed-{{ g.id }}">
+                  <a href="{% url 'savings_update' g.id %}">Изменить</a>
+                  <form action="{% url 'savings_delete' g.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="danger-link">Удалить</button>
+                  </form>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+  function toggleMenu(id) {
+    const menu = document.getElementById(id);
+    if (!menu) return;
+    menu.classList.toggle('is-open');
+  }
+
+  // закрывать по клику вне
+  document.addEventListener('click', function (e) {
+    const menus = document.querySelectorAll('.actions-menu');
+    menus.forEach(m => {
+      if (!m.contains(e.target) && !m.previousElementSibling?.contains(e.target)) {
+        m.classList.remove('is-open');
+      }
+    });
+  });
+</script>
+{% endblock %}

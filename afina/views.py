@@ -3,10 +3,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import RegisterForm
-from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
-from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm)
+from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal
+from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm, SavingGoalForm)
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, F
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.core.paginator import Paginator
@@ -15,9 +15,7 @@ from django.utils.dateparse import parse_date
 import stripe
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 from django.urls import reverse
-from django.http import JsonResponse
 
 # Регистрация
 # metodi bystroy razrabotki
@@ -60,7 +58,7 @@ def home_view(request):
 # -------------------------
 @login_required
 def income_category_list(request):
-    qs = IncomeCategory.objects.order_by('id')
+    qs = income_categories_for_user(request.user)
     paginator = Paginator(qs, 6)               # по 8 записей на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number) # безопасно: сам обрабатывает мусорные значения
@@ -129,7 +127,7 @@ def income_category_delete(request, pk):
 # -------- ExpenseCategory CRUD --------
 @login_required
 def expense_category_list(request):
-    qs = ExpenseCategory.objects.order_by('id')
+    qs = expense_categories_for_user(request.user)
     paginator = Paginator(qs, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -312,7 +310,7 @@ def profile_edit(request):
 from django.contrib import messages
 
 
-def categories_for_user(user):
+def expense_categories_for_user(user):
     return ExpenseCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'expenseName')
 
 def income_categories_for_user(user):
@@ -405,7 +403,7 @@ def stripe_test_view(request):
 
 
 
-@csrf_exempt              # у тебя и так стояло — оставим для простоты
+@csrf_exempt
 @login_required
 def create_checkout_session(request):
     if request.method != "POST":
@@ -441,3 +439,59 @@ def stripe_success_view(request):
 @login_required
 def stripe_cancel_view(request):
     return render(request, "stripe_cancel.html")
+
+@login_required
+def savings_list(request):
+    qs = SavingGoal.objects.filter(user=request.user)
+
+    active_goals = qs.filter(current_amount__lt=F("target_amount"))
+    completed_goals = qs.filter(current_amount__gte=F("target_amount"))
+
+    context = {
+        "active_goals": active_goals,
+        "completed_goals": completed_goals,
+    }
+    return render(request, "savings_list.html", context)
+
+
+@login_required
+def savings_create(request):
+    if request.method == "POST":
+        form = SavingGoalForm(request.POST)
+        if form.is_valid():
+            goal: SavingGoal = form.save(commit=False)
+            goal.user = request.user
+            goal.save()
+            return redirect("savings_list")
+    else:
+        form = SavingGoalForm(initial={"current_amount": 0})
+
+    return render(request, "savings_form.html", {"form": form, "mode": "create"})
+
+
+@login_required
+def savings_update(request, pk):
+    goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        form = SavingGoalForm(request.POST, instance=goal)
+        if form.is_valid():
+            form.save()  # после сохранения, если current_amount >= target_amount,
+                         # цель автоматически уйдёт в блок "Уже накоплено"
+            return redirect("savings_list")
+    else:
+        form = SavingGoalForm(instance=goal)
+
+    return render(request, "savings_form.html", {"form": form, "mode": "edit", "goal": goal})
+
+
+@login_required
+def savings_delete(request, pk):
+    goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        goal.delete()
+        return redirect("savings_list")
+
+    # можно сделать простое подтверждение, но чаще всего вызывают сразу POST
+    return redirect("savings_list")

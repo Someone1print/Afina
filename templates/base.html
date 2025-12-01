@@ -5,29 +5,24 @@
   <meta charset="UTF-8" />
   <title>{% block title %}AFINA — ваш финансовый помощник{% endblock %}</title>
 
-  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'afina/images/afina-logo.png' %}">
-  <link rel="apple-touch-icon" href="{% static 'afina/images/afina-logo.png' %}">
-
+  <link rel="icon" type="image/png" href="{% static 'afina/images/afina-logo.png' %}">
   <link rel="stylesheet" href="{% static 'Style/General.css' %}">
 
   {% block extra_css %}{% endblock %}
 </head>
 
 <body>
-  <header class="site-header">
+<header class="site-header">
   <div class="container nav">
 
-    <!-- ЛОГО -->
-    <div class="logo">
-      <a href="{% url 'home' %}" class="logo-link">
-        <img src="{% static 'afina/images/afina-logo.png' %}" alt="AFINA Logo" class="logo-img">
-        <span class="logo-text">AFINA</span>
-      </a>
-    </div>
+    <!-- LOGO -->
+    <a href="{% url 'home' %}" class="logo-link">
+      <img src="{% static 'afina/images/afina-logo.png' %}" class="logo-img" alt="AFINA">
+      <span class="logo-text">AFINA</span>
+    </a>
 
-    <!-- МЕНЮ -->
+    <!-- NAVIGATION -->
     <ul class="nav-links">
-
       <li><a href="{% url 'home' %}">Главная</a></li>
 
       <li class="dropdown">
@@ -40,45 +35,56 @@
 
       <li><a href="{% url 'income_list' %}">Доходы</a></li>
       <li><a href="{% url 'expense_list' %}">Расходы</a></li>
-      <li><a href="{% url 'profile_view' %}">Профиль</a></li>
 
       {% if user.is_authenticated %}
-        <!-- Когда пользователь вошёл -->
-        <li><a href="{% url 'logout' %}" class="btn-link">Выйти</a></li>
-        <li><a href="{% url 'profile_view' %}" class="">{{ user.username }}</a></li>
-      {% else %}
-        <!-- Когда пользователь НЕ вошёл -->
-        <li><a href="{% url 'login' %}" class="btn-link">Войти</a></li>
-      {% endif %}
+        <!-- ПУНКТ ПРОФИЛЯ С ВЫПАДАЮЩИМ МЕНЮ -->
+        <li class="nav-user">
+          <button type="button" class="nav-username" id="userMenuToggle">
+            {{ user.username }}
+            <span class="nav-username__arrow">▾</span>
+          </button>
 
+          <div class="user-menu" id="userMenu">
+            <a href="{% url 'profile_view' %}" class="user-menu__item">Профиль</a>
+            <a href="{% url 'income_category_list' %}" class="user-menu__item">Категории доходов</a>
+            <a href="{% url 'expense_category_list' %}" class="user-menu__item">Категории расходов</a>
+            <a href="{% url 'income_list' %}" class="user-menu__item">Доходы</a>
+            <a href="{% url 'expense_list' %}" class="user-menu__item">Расходы</a>
+            <a href="{% url 'stripe_test' %}" class="user-menu__item">Подписка</a>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="user-menu__item user-menu__item--danger">
+                Выход
+              </button>
+            </form>
+          </div>
+        </li>
+      {% else %}
+        <!-- КОГДА НЕ ВОШЁЛ -->
+        <li>
+          <a class="nav-login" href="{% url 'login' %}">Войти</a>
+        </li>
+      {% endif %}
     </ul>
 
   </div>
 </header>
 
 
+<main class="site-main">
+  <div class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+</main>
 
 
-  <!-- MAIN -->
-  <main class="site-main">
-    <div class="container">
-      {% if user.is_authenticated %}
-      {% endif %}
-
-      {% if messages %}
-        <div class="flash">
-          {% for message in messages %}
-            <div class="flash-item">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      {% block content %}{% endblock %}
-    </div>
-  </main>
-
-  <!-- FOOTER -->
-  <footer>
+<footer class="site-footer">
   <div class="footer-container">
     <p>© AFINA. Все права защищены.</p>
     <ul>
@@ -89,7 +95,7 @@
   </div>
 </footer>
 
-
-  {% block extra_js %}{% endblock %}
+{% block extra_js %}{% endblock %}
 </body>
+<script src="{% static 'JS/base.js' %}"></script>
 </html>

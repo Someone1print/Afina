@@ -13,7 +13,6 @@
 html, body {
   height: 100%;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #223d77, #0f1931);
   color: #f4f4f4;
 }
 
@@ -21,6 +20,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: linear-gradient(135deg, #223d77, #0f1931);
+  background-attachment: fixed;
 }
 
 /* Контейнер для содержимого страницы */
@@ -116,7 +117,7 @@ main.page-content {
 }
 
 .nav-links a {
-  color: #222;
+  color: #223D77;
   font-weight: 600;
   text-decoration: none;
   padding: 8px 14px;
@@ -476,7 +477,7 @@ td.actions {
 .btn-small { height: 34px; padding: 0 12px; font-size: 14px; line-height: 34px; }
 .btn-outline {
   background: #fff;
-  color: #ffffff;
+  color: #223D77;
   border: 1.5px solid #c7d2fe;
 }
 .btn-outline:hover { background: #eef2ff; }
@@ -591,9 +592,95 @@ button.btn {
   color: #fff;
   border: 1px solid #223d77;
 }
-
-/* Кнопка-«заглушка», когда переход недоступен */
-.btn.is-disabled {
-  opacity: 0.5;
-  pointer-events: none;
+/* Синяя кнопка "Изменить" в таблице категорий */
+.cat-table .btn-outline.btn-small {
+    background: #223d77;      /* синий фон */
+    border-color: #223d77;    /* синий бордер */
+    color: #fff;              /* белый текст */
 }
+
+/* Ховер по этой кнопке */
+.cat-table .btn-outline.btn-small:hover {
+    background: #1c3066;      /* чуть темнее при наведении */
+    border-color: #1c3066;
+    color: #fff;
+}
+
+/* ===== USER MENU (дропдаун по имени) ===== */
+
+.nav-user {
+  position: relative;
+  margin-left: 20px;
+}
+
+.nav-username {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 2px solid #223d77;
+  background: transparent;
+  color: #223d77;
+  font-size: 17px;
+  font-weight: 550;
+  cursor: pointer;
+  text-decoration: none;
+
+}
+
+.nav-username__arrow {
+  font-size: 22px;
+}
+
+.nav-username:hover {
+  background: #ffffff;
+  color: #223D77;
+}
+
+/* Выпадающее меню */
+.user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(15, 25, 49, 0.25);
+  padding: 8px 0;
+  display: none;              /* по умолчанию скрыто */
+  z-index: 1200;
+}
+
+.nav-user.open .user-menu {
+  display: block;
+}
+
+.user-menu__item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: #1b2437;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.user-menu__item:hover {
+  background: #eef3ff;
+  color: #223d77;
+}
+
+.user-menu__item--danger {
+  color: #c93a3a;
+}
+
+.user-menu__item--danger:hover {
+  background: #fff5f5;
+  color: #b42828;
+}
+
