@@ -113,11 +113,13 @@ nav[aria-label="Навигация по страницам"] {
 .container {
     padding-bottom: 60px;
 }
+
 .chart-row {
     display: block;
     width: 100%;
 }
+
 .chart-row > div {
-    width: 100%;         /* каждый занимает всю ширину */
-    margin-bottom: 30px;          /* чтобы обе карточки были одинаковой ширины */
+    width: 100%;
+    margin-bottom: 30px;
 }

@@ -11,7 +11,7 @@
   <div class="income-card">
     <!-- Шапка карточки -->
     <div class="income-card__header">
-      <h1 class="income-title">Доходы</h1>
+      <h1 class="income-title">Расходы</h1>
     </div>
 
     <!-- Таблица -->
@@ -30,7 +30,8 @@
         {% for i in items %}
           <tr>
             <td>{{ i.date }}</td>
-            <td>{{ i.category.incomeName }}</td>
+            {# если в модели поле называется иначе — поменяй здесь #}
+            <td>{{ i.category.expenseName }}</td>
             <td>{{ i.amount }}</td>
             <td>{{ i.note }}</td>
             <td class="actions-cell">
@@ -43,14 +44,14 @@
                 <div class="row-menu">
                   <button type="button"
                           class="row-menu__item row-menu__item--edit"
-                          onclick="location.href='{% url 'income_update' i.id %}'">
+                          onclick="location.href='{% url 'expense_update' i.id %}'">
                     <span class="row-menu__icon">✏️</span>
                     <span class="row-menu__text">Изменить</span>
                   </button>
 
                   <button type="button"
                           class="row-menu__item row-menu__item--delete"
-                          onclick="location.href='{% url 'income_delete' i.id %}'">
+                          onclick="location.href='{% url 'expense_delete' i.id %}'">
                     <span class="row-menu__icon">🗑</span>
                     <span class="row-menu__text">Удалить</span>
                   </button>
@@ -60,7 +61,7 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="5" class="empty-row">Пока нет доходов</td>
+            <td colspan="5" class="empty-row">Пока нет расходов</td>
           </tr>
         {% endfor %}
         </tbody>
@@ -106,81 +107,80 @@
     </nav>
     {% endif %}
 
-    <!-- Нижняя панель: выбор периода + добавить доход -->
+    <!-- Нижняя панель: выбор периода + добавить расход -->
     <div class="income-card__footer">
-     {# ====== ПАНЕЛЬ "ВЫБРАТЬ ПЕРИОД" ====== #}
-<div class="period-bar">
-  <button type="button" class="period-trigger" onclick="openPeriodModal()">
-    <span class="period-trigger__icon">⚲</span>  {# можно заменить на свою SVG-иконку #}
-    <span class="period-trigger__text">Выбрать период</span>
-    <span class="period-trigger__chevron">▾</span>
-  </button>
-</div>
+      {# ====== ПАНЕЛЬ "ВЫБРАТЬ ПЕРИОД" ====== #}
+      <div class="period-bar">
+        <button type="button" class="period-trigger" onclick="openPeriodModal()">
+          <span class="period-trigger__icon">⚲</span>
+          <span class="period-trigger__text">Выбрать период</span>
+          <span class="period-trigger__chevron">▾</span>
+        </button>
+      </div>
 
-{# ====== МОДАЛЬНОЕ ОКНО ВЫБОРА ПЕРИОДА ====== #}
-<div id="periodModal" class="modal period-modal" aria-hidden="true">
-  <div class="modal__overlay" onclick="closePeriodModal()"></div>
+      {# ====== МОДАЛЬНОЕ ОКНО ВЫБОРА ПЕРИОДА ====== #}
+      <div id="periodModal" class="modal period-modal" aria-hidden="true">
+        <div class="modal__overlay" onclick="closePeriodModal()"></div>
 
-  <div class="modal__content period-modal__content" role="dialog" aria-modal="true">
-    <div class="period-modal__header">
-      <span class="period-modal__title">Выбрать период</span>
-    </div>
+        <div class="modal__content period-modal__content" role="dialog" aria-modal="true">
+          <div class="period-modal__header">
+            <span class="period-modal__title">Выбрать период</span>
+          </div>
 
-    <div class="period-modal__dates">
-      <div class="period-date">
-        <span class="period-date__label">Начало</span>
-        <div class="period-date__input-wrap">
-          <input type="date" id="start" class="period-date__input"
-                 value="{{ request.GET.start }}">
+          <div class="period-modal__dates">
+            <div class="period-date">
+              <span class="period-date__label">Начало</span>
+              <div class="period-date__input-wrap">
+                <input type="date" id="start" class="period-date__input"
+                       value="{{ request.GET.start }}">
+              </div>
+            </div>
+
+            <div class="period-date">
+              <span class="period-date__label">Конец</span>
+              <div class="period-date__input-wrap">
+                <input type="date" id="end" class="period-date__input"
+                       value="{{ request.GET.end }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="period-modal__quick">
+            <button type="button" class="period-quick-btn" onclick="setRangePreset('week')">
+              Неделя
+            </button>
+            <button type="button" class="period-quick-btn" onclick="setRangePreset('month')">
+              За месяц
+            </button>
+            <button type="button" class="period-quick-btn" onclick="setRangePreset('3months')">
+              Три месяца
+            </button>
+          </div>
+
+          <div class="period-modal__actions">
+            <button type="button" class="btn btn-outline period-modal__btn" onclick="clearDates()">
+              Сбросить
+            </button>
+            <button type="button" class="btn btn-primary period-modal__btn" onclick="applyPeriod()">
+              Применить
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="period-date">
-        <span class="period-date__label">Конец</span>
-        <div class="period-date__input-wrap">
-          <input type="date" id="end" class="period-date__input"
-                 value="{{ request.GET.end }}">
-        </div>
-      </div>
-    </div>
-
-    <div class="period-modal__quick">
-      <button type="button" class="period-quick-btn" onclick="setRangePreset('week')">
-        Неделя
-      </button>
-      <button type="button" class="period-quick-btn" onclick="setRangePreset('month')">
-        За месяц
-      </button>
-      <button type="button" class="period-quick-btn" onclick="setRangePreset('3months')">
-        Три месяца
-      </button>
-    </div>
-
-    <div class="period-modal__actions">
-      <button type="button" class="btn btn-outline period-modal__btn" onclick="clearDates()">
-        Сбросить
-      </button>
-      <button type="button" class="btn btn-primary period-modal__btn" onclick="applyPeriod()">
-        Применить
-      </button>
-    </div>
-  </div>
-</div>
-
-
-      <a href="{% url 'income_create' %}" class="btn-add-income">
-        Добавить доход
+      <a href="{% url 'expense_create' %}" class="btn-add-income">
+        Добавить расход
       </a>
     </div>
   </div>
 </section>
 
-   <script>
+<script>
 /* ====== Модалка периода ====== */
 function openPeriodModal() {
   const m = document.getElementById('periodModal');
   m.classList.add('open');
-  document.body.classList.add('no-scroll');   // у тебя уже используется для других модалок
+  document.body.classList.add('no-scroll');
 }
 
 function closePeriodModal() {
@@ -205,7 +205,6 @@ function setRangePreset(preset) {
     start.setMonth(start.getMonth() - 3);
   }
 
-  // формат YYYY-MM-DD
   const toISO = d => d.toISOString().slice(0, 10);
 
   endInput.value = toISO(today);
@@ -214,13 +213,11 @@ function setRangePreset(preset) {
 
 /* Сброс периодов */
 function clearDates(){
-       // твоя функция для графиков
+  // твоя функция для графиков
   closePeriodModal();
 }
 
-/* Применить — перерисовать графики и закрыть модалку
-   (если захочешь фильтровать ещё и таблицу по GET-параметрам —
-   потом можно сюда добавить формирование querystring и location.href) */
+/* Применить */
 function applyPeriod() {
   closePeriodModal();
 }
@@ -228,14 +225,12 @@ function applyPeriod() {
 document.addEventListener('click', function (e) {
   const actionContainer = e.target.closest('.row-actions');
 
-  // клик по кнопке в самой ячейке
   if (actionContainer && e.target.closest('.row-actions__toggle')) {
     e.preventDefault();
     actionContainer.classList.toggle('open');
     return;
   }
 
-  // клик вне меню — закрываем все
   document.querySelectorAll('.row-actions.open')
     .forEach(el => el.classList.remove('open'));
 });
