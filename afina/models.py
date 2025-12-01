@@ -67,9 +67,20 @@ class ExpenseCategory(models.Model):
 
 
 class Profile(models.Model):
+    CURRENCY_CHOICES = [
+        ("KGS", "Сом (KGS)"),
+        ("USD", "Доллар (USD)"),
+        ("EUR", "Евро (EUR)"),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     full_name = models.CharField("ФИО", max_length=150, blank=True)
-    currency = models.CharField("Валюта по умолчанию", max_length=10, default="KGS")
+    currency = models.CharField(
+        "Валюта",
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default="KGS"
+    )
 
     # avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)  # если нужно
 
