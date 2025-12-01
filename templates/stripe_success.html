@@ -1,8 +1,28 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Подписка оформлена — AFINA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/stripe_subscription.css' %}">
+{% endblock %}
+
 {% block content %}
-  <div class="alert alert-success" style="margin-top: 30px;">
-    <h2>Оплата прошла успешно ✅</h2>
-    <p>Спасибо! Платёж был проведён в тестовом режиме Stripe.</p>
-    <a href="{% url 'home' %}" class="btn btn-primary">На главную</a>
+<section class="payment-status-page">
+  <div class="payment-status-card">
+    <div class="payment-status-icon payment-status-icon-success">
+      ✓
+    </div>
+
+    <h1 class="payment-status-title">Подписка оформлена</h1>
+
+    <p class="payment-status-text">
+      Оплата прошла успешно. Премиум-функции AFINA теперь доступны в&nbsp;вашем аккаунте.
+    </p>
+
+    <a href="{% url 'home' %}" class="tariff-btn premium-btn payment-status-btn">
+      Перейти на главную
+    </a>
   </div>
+</section>
 {% endblock %}
