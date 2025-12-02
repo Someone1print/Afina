@@ -186,3 +186,47 @@
     grid-template-columns: 1fr;
   }
 }
+/* ===== Прогресс копилки ===== */
+
+.progress-cell {
+  min-width: 220px;
+}
+
+.progress-cell__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.progress-cell__amount {
+  font-weight: 600;
+  color: #111827;
+}
+
+.progress-cell__percent {
+  color: #4b5563;
+}
+
+/* контейнер полоски */
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+/* заполняемая часть */
+.progress-bar__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0; /* старт с 0% */
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1e3c88, #3b82f6);
+  transition: width 0.9s ease-out;
+}

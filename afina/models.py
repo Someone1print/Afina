@@ -157,5 +157,12 @@ class SavingGoal(models.Model):
     @property
     def progress_percent(self) -> int:
         if self.target_amount and self.target_amount != 0:
-            return int((self.current_amount / self.target_amount) * 100)
+            percent = int((self.current_amount / self.target_amount) * 100)
+
+            # Ограничение, чтобы не выше 100%
+            if percent > 100:
+                percent = 100
+
+            return percent
+
         return 0
