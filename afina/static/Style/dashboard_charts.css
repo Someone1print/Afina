@@ -4,15 +4,14 @@
 
 /* Секция с графиками */
 .dashboard-section {
-    padding: 60px 20px 20px;
-    background: #f8f9fc;          /* светлый фон под карточкой */
+    padding: 60px 20px 20px;/* светлый фон под карточкой */
+    background: transparent;
 }
 
 /* Большая белая карточка как на макете */
 .dashboard-card {
     max-width: 1240px;
     margin: 0 auto 60px;
-    background: #ffffff;
     border-radius: 32px;
     padding: 50px 60px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.11);
