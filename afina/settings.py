@@ -26,7 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    '.ngrok-free.dev'
+]
 
 
 # Application definition
@@ -52,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'afina.middleware.SkipNgrokBrowserWarningMiddleware',
 ]
 
 ROOT_URLCONF = 'afina.urls'
@@ -154,6 +158,11 @@ SPECTACULAR_SETTINGS = {
 ***REMOVED***
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', 'pk_test_51SXGylHDyrxMN0Jp6uWRtENXFElU8hdTjs146Wp752MChsWIxCoCYFGEHBAshvf8rjE1dGPHLcBWjFXBxmmo0N4A00nWRZLHtR')
 STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_1SXHX8HDyrxMN0JpIklIongA')
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.dev',  # wildcard for any ngrok subdomain
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
