@@ -1,11 +1,181 @@
 {% extends 'base.html' %}
-{% block content %}
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    {% block extra_css %}
+    <style>
 
-<h2>{{ title }}</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-success">Сохранить</button>
-  <a href="{% url 'expense_category_list' %}" class="btn btn-secondary">Назад</a>
-</form>
+        /* Стили для выпадающего меню */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 10px 0;
+            top: 100%;
+            left: 0;
+            z-index: 1001;
+        }
+
+        .dropdown-content a {
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f8f9fa;
+            color: #223d77;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+
+
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 100px auto 50px
+        }
+
+        h1 {
+            color: #223d77;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-align: center;
+        }
+
+        form {
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        button, a.button {
+            background: #2563eb;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        button:hover, a.button:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        a.button.secondary {
+            background: #6b7280;
+        }
+
+        a.button.secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Стили для ошибок формы */
+        .errorlist {
+            color: #dc2626;
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        .errorlist li {
+            margin: 2px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 80px auto 30px;
+            }
+
+            .content {
+                padding: 30px 20px;
+                margin: 0 10px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+    {% endblock%}
+</head>
+{% block content %}
+<body>
+
+    <div class="container">
+        <div class="content">
+            <h1>{{ title }}</h1>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="actions">
+                    <button type="submit">Сохранить</button>
+                    <a class="button secondary" href="{% url 'expense_category_list' %}">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
 {% endblock %}
+</html>
