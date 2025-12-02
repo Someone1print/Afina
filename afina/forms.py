@@ -14,7 +14,7 @@ class RegisterForm(UserCreationForm):
         fields = ['username', 'email', 'password1', 'password2']
 
 class IncomeCategoryForm(forms.ModelForm):
-    incomeName = forms.CharField(label='Название категории', max_length=100)
+    incomeName = forms.CharField(label='Категории доходов', max_length=100)
 
     class Meta:
         model = IncomeCategory
@@ -24,6 +24,9 @@ class ExpenseCategoryForm(forms.ModelForm):
     class Meta:
         model = ExpenseCategory
         fields = ["expenseName"]
+        labels = {
+            "expenseName": "Категория расходов",
+        }
 
 class IncomeForm(forms.ModelForm):
     class Meta:
