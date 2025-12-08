@@ -428,31 +428,35 @@ def stripe_test_view(request):
 
 @csrf_exempt
 @login_required
+# Когда происходит создание платежа
 def create_checkout_session(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid method"}, status=400)
+    email = request.user.email  # Получаем email текущего пользователя
 
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
-    try:
-        checkout_session = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[
-                {
-                    "price": settings.STRIPE_PRICE_ID,  # price_xxx из Stripe
-                    "quantity": 1,
-                }
-            ],
-            success_url=request.build_absolute_uri(
-                reverse("stripe_success")
-            ) + "?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=request.build_absolute_uri(reverse("stripe_cancel")),
+    # Проверяем, существует ли клиент в Stripe
+    existing_customer = stripe.Customer.list(email=email).data
+    if existing_customer:
+        customer_id = existing_customer[0].id  # Используем ID существующего клиента
+    else:
+        # Создаем нового клиента, если не найден
+        customer = stripe.Customer.create(
+            email=email,
+            name=request.user.username,
         )
-        return JsonResponse({"id": checkout_session.id})
-    except Exception as e:
-        # Чтобы было видно точную ошибку
-        return JsonResponse({"error": str(e)}, status=500)
+        customer_id = customer.id
 
+    # Продолжаем с созданием сессии на основе найденного или созданного клиента
+    checkout_session = stripe.checkout.Session.create(
+        customer=customer_id,  # Используем customer_id
+        mode="subscription",
+        line_items=[{
+            "price": settings.STRIPE_PRICE_ID,  # price_xxx из Stripe
+            "quantity": 1,
+        }],
+        success_url=request.build_absolute_uri(reverse("stripe_success")) + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=request.build_absolute_uri(reverse("stripe_cancel")),
+    )
+
+    return JsonResponse({"id": checkout_session.id})
 
 @login_required
 def stripe_success_view(request):
