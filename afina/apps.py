@@ -5,5 +5,5 @@ class FinanceConfig(AppConfig):
     name = 'afina'
 
     def ready(self):
-        from . import signals
+        import afina.signals
 
