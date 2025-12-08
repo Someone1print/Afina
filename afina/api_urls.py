@@ -19,6 +19,9 @@ urlpatterns = [
     # JWT Авторизация
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 
     # Профиль и хелсчек
     path('me/profile/', ProfileMeView.as_view(), name='profile_me'),
@@ -30,6 +33,6 @@ urlpatterns = [
     # ГРАФИКИ ДЛЯ ДАШБОРДА — САМОЕ ВАЖНОЕ
     path('dashboard/expenses-by-day/', dashboard_expenses_by_day_api, name='dashboard_expenses_by_day'),
     path('dashboard/expenses-by-category/', dashboard_expenses_by_category_pie_api, name='dashboard_expenses_by_category'),
-path('dashboard/income-by-day/', dashboard_income_by_day_api, name='dashboard_income_by_day'),
-path('dashboard/income-by-category/', dashboard_income_by_category_pie_api, name='dashboard_income_by_category'),
+    path('dashboard/income-by-day/', dashboard_income_by_day_api, name='dashboard_income_by_day'),
+    path('dashboard/income-by-category/', dashboard_income_by_category_pie_api, name='dashboard_income_by_category'),
 ]
