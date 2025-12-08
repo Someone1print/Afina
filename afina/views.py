@@ -16,6 +16,8 @@ import stripe
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+from django.shortcuts import render
+from .utils import is_subscription_active  # Импортируем функцию для проверки подписки
 
 # Регистрация
 # metodi bystroy razrabotki
@@ -50,9 +52,16 @@ def logout_view(request):
     print("Вы вышли из системы")
     return redirect('login')
 
-def home_view(request):
-    return render(request, 'home.html')
 
+def home_view(request):
+    user = request.user
+    # Проверяем, есть ли у пользователя активная подписка
+    has_active_subscription = is_subscription_active(user)
+
+    # Рендерим главную страницу с информацией о подписке
+    return render(request, 'home.html', {
+        'has_active_subscription': has_active_subscription,  # Передаем переменную в шаблон
+    })
 # -------------------------
 # IncomeCategory CRUD views
 # -------------------------
