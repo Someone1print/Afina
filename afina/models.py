@@ -81,15 +81,14 @@ class Profile(models.Model):
         choices=CURRENCY_CHOICES,
         default="KGS"
     )
-
-    # avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)  # если нужно
+    stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)  # Новое поле для хранения ID клиента в Stripe
 
     class Meta:
         db_table = 'profile'
         verbose_name = "Профиль"
         verbose_name_plural = "Профили"
 
-    def _str_(self):
+    def __str__(self):
         return self.full_name or self.user.username
 
 class Income(models.Model):
