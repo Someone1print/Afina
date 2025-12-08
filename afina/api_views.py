@@ -7,13 +7,17 @@ from rest_framework.views import APIView
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
 from .api_serializers import (
     IncomeCategorySerializer, ExpenseCategorySerializer,
-    IncomeSerializer, ExpenseSerializer, ProfileSerializer
+    IncomeSerializer, ExpenseSerializer, ProfileSerializer,RegisterSerializer,LoginSerializer
 )
 from .api_permissions import IsOwnerOrReadOnly
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Sum
+from rest_framework import status
+from django.contrib.auth import authenticate
+from django.contrib.auth import logout
+
 
 # --- Healthcheck ---
 class HealthView(APIView):
@@ -302,3 +306,29 @@ def dashboard_income_by_category_pie_api(request):
         "categories": categories,
         "amounts": amounts
     })
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = authenticate(
+                username=serializer.validated_data['username'],
+                password=serializer.validated_data['password']
+            )
+            if user:
+                return Response({"message": "Login successful"}, status=200)
+            return Response({"message": "Invalid credentials"}, status=401)
+        return Response(serializer.errors, status=400)
+
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)  # Завершаем сессию пользователя
+        return Response({"message": "Logged out successfully."}, status=200)

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile
 from django.db.models.functions import Lower
+from django.contrib.auth.models import User
+
 
 # --- Общие валидаторы для "Другое" (дефолт) ---
 def _forbid_default_change_or_delete(instance):
@@ -106,3 +108,24 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['full_name', 'currency']
+
+# --- Register ---
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            validated_data['username'],
+            validated_data['email'],
+            validated_data['password']
+        )
+        return user
+
+# --- Login ---
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
