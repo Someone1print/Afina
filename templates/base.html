@@ -14,7 +14,6 @@
 <body>
 <header class="site-header">
   <div class="container nav">
-
     <!-- LOGO -->
     <a href="{% url 'home' %}" class="logo-link">
       <img src="{% static 'afina/images/afina-logo.png' %}" class="logo-img" alt="AFINA">
@@ -51,7 +50,15 @@
             <a href="{% url 'income_list' %}" class="user-menu__item">Доходы</a>
             <a href="{% url 'expense_list' %}" class="user-menu__item">Расходы</a>
             <a href="{% url 'stripe_test' %}" class="user-menu__item">Подписка</a>
+
+            <!-- Если подписка активна, показываем Копилку -->
+            {% if has_active_subscription %}
               <a href="{% url 'savings_list' %}" class="user-menu__item">Копилка</a>
+            {% else %}
+              <!-- Для пользователей без подписки перенаправляем на страницу подписки -->
+              <a href="{% url 'stripe_test' %}" class="user-menu__item" id="redirectToSubscription">Копилка (требуется подписка)</a>
+            {% endif %}
+
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
               <button type="submit" class="user-menu__item user-menu__item--danger">
@@ -61,16 +68,13 @@
           </div>
         </li>
       {% else %}
-        <!-- КОГДА НЕ ВОШЁЛ -->
         <li>
           <a class="nav-login" href="{% url 'login' %}">Войти</a>
         </li>
       {% endif %}
     </ul>
-
   </div>
 </header>
-
 
 <main class="site-main">
   <div class="container">
@@ -84,7 +88,6 @@
   </div>
 </main>
 
-
 <footer class="site-footer">
   <div class="footer-container">
     <p>© AFINA. Все права защищены.</p>
@@ -97,6 +100,6 @@
 </footer>
 
 {% block extra_js %}{% endblock %}
-</body>
 <script src="{% static 'JS/base.js' %}"></script>
+</body>
 </html>

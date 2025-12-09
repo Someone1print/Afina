@@ -1,18 +1,19 @@
 (function() {
     const toggle = document.getElementById('userMenuToggle');
     const userLi = document.querySelector('.nav-user');
+    const redirectToSubscriptionButton = document.getElementById('redirectToSubscription');  // Кнопка перенаправления
 
     if (!toggle || !userLi) return;
 
-    // открытие/закрытие по клику
+    // открытие/закрытие меню по клику
     toggle.addEventListener('click', function (e) {
-      e.stopPropagation();
-      userLi.classList.toggle('open');
+        e.stopPropagation();
+        userLi.classList.toggle('open');
     });
 
     // клик вне меню — закрыть
     document.addEventListener('click', function () {
-      userLi.classList.remove('open');
+        userLi.classList.remove('open');
     });
 
     // чтобы клик внутри меню не закрывал сразу
@@ -22,4 +23,12 @@
             e.stopPropagation();
         });
     }
-  })();
+
+    // Обработчик для кнопки "Копилка (требуется подписка)"
+    if (redirectToSubscriptionButton) {
+        redirectToSubscriptionButton.addEventListener('click', function(event) {
+            event.preventDefault();  // Отменяем стандартное поведение
+            window.location.href = "{% url 'stripe_test' %}";  // Перенаправляем на страницу подписки
+        });
+    }
+})();
