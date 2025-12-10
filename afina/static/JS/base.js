@@ -25,10 +25,5 @@
     }
 
     // Обработчик для кнопки "Копилка (требуется подписка)"
-    if (redirectToSubscriptionButton) {
-        redirectToSubscriptionButton.addEventListener('click', function(event) {
-            event.preventDefault();  // Отменяем стандартное поведение
-            window.location.href = "{% url 'stripe_test' %}";  // Перенаправляем на страницу подписки
-        });
-    }
+
 })();

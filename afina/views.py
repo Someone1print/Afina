@@ -478,20 +478,25 @@ def stripe_cancel_view(request):
 
 @login_required
 def savings_list(request):
-    qs = SavingGoal.objects.filter(user=request.user)
+    has_active_subscription = is_subscription_active(request.user)
 
+    qs = SavingGoal.objects.filter(user=request.user)
     active_goals = qs.filter(current_amount__lt=F("target_amount"))
     completed_goals = qs.filter(current_amount__gte=F("target_amount"))
 
     context = {
         "active_goals": active_goals,
         "completed_goals": completed_goals,
+        "has_active_subscription": has_active_subscription,
     }
     return render(request, "savings_list.html", context)
 
 
+
 @login_required
 def savings_create(request):
+    has_active_subscription = is_subscription_active(request.user)
+
     if request.method == "POST":
         form = SavingGoalForm(request.POST)
         if form.is_valid():
@@ -502,32 +507,43 @@ def savings_create(request):
     else:
         form = SavingGoalForm(initial={"current_amount": 0})
 
-    return render(request, "savings_form.html", {"form": form, "mode": "create"})
+    return render(
+        request,
+        "savings_form.html",
+        {"form": form, "mode": "create", "has_active_subscription": has_active_subscription},
+    )
 
 
 @login_required
 def savings_update(request, pk):
+    has_active_subscription = is_subscription_active(request.user)
+
     goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
 
     if request.method == "POST":
         form = SavingGoalForm(request.POST, instance=goal)
         if form.is_valid():
-            form.save()  # после сохранения, если current_amount >= target_amount,
-                         # цель автоматически уйдёт в блок "Уже накоплено"
+            form.save()
             return redirect("savings_list")
     else:
         form = SavingGoalForm(instance=goal)
 
-    return render(request, "savings_form.html", {"form": form, "mode": "edit", "goal": goal})
+    return render(
+        request,
+        "savings_form.html",
+        {"form": form, "mode": "edit", "goal": goal, "has_active_subscription": has_active_subscription},
+    )
 
 
 @login_required
 def savings_delete(request, pk):
+    has_active_subscription = is_subscription_active(request.user)
+
     goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
 
     if request.method == "POST":
         goal.delete()
         return redirect("savings_list")
 
-    # можно сделать простое подтверждение, но чаще всего вызывают сразу POST
     return redirect("savings_list")
+    # в шаблон тут не рендерим, так что флаг не нужен
