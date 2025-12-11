@@ -53,11 +53,15 @@
 
             <!-- Если подписка активна, показываем Копилку -->
             {% if has_active_subscription %}
-              <a href="{% url 'savings_list' %}" class="user-menu__item">Копилка</a>
+                <a href="{% url 'savings_list' %}" class="user-menu__item">
+                Копилка
+            </a>
             {% else %}
-              <!-- Для пользователей без подписки перенаправляем на страницу подписки -->
-              <a href="{% url 'stripe_test' %}" class="user-menu__item" id="redirectToSubscription">Копилка (требуется подписка)</a>
+                <a href="{% url 'stripe_test' %}" class="user-menu__item">
+                    Копилка (требуется подписка)
+                </a>
             {% endif %}
+
 
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
