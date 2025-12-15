@@ -18,6 +18,11 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from .models import SavingGoal, Expense, ExpenseCategory
+from .forms import SavingGoalForm
 
 # Регистрация
 def register_view(request):
@@ -897,3 +902,39 @@ def dashboard_income_by_category_pie_api(request):
         "categories": categories,
         "amounts": amounts
     })
+@login_required
+def savings_update(request, pk):
+    goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        form = SavingGoalForm(request.POST, instance=goal)
+        if form.is_valid():
+            goal = form.save(commit=False)
+
+            # Рассчитываем разницу между старой и новой суммой
+            added_amount = goal.current_amount - goal._state.fields_cache.get('current_amount', 0)
+
+            # Если сумма была добавлена, создаем расход
+            if added_amount > 0:
+                # Исправление: используем 'expenseName' вместо 'name'
+                expense_category = ExpenseCategory.objects.get(expenseName="Накопление")  # Исправлено на expenseName
+
+                # Создаем новый расход
+                Expense.objects.create(
+                    user=request.user,
+                    category=expense_category,
+                    amount=added_amount,
+                    date=timezone.now(),
+                    note="Пополнение цели накопления"
+                )
+
+            goal.save()
+            return redirect("savings_list")
+    else:
+        form = SavingGoalForm(instance=goal)
+
+    return render(
+        request,
+        "savings_form.html",
+        {"form": form, "mode": "edit", "goal": goal}
+    )
