@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegisterForm
+from .forms import RegisterForm, SavingGoalForm, ProfileForm
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal, UserSubscription
 from .forms import (IncomeCategoryForm, ExpenseCategoryForm, IncomeForm, ExpenseForm, ProfileForm, SavingGoalForm)
 from django.contrib.auth.decorators import login_required
@@ -18,11 +18,6 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from datetime import datetime
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
-from .models import SavingGoal, Expense, ExpenseCategory
-from .forms import SavingGoalForm
 
 # Регистрация
 def register_view(request):
@@ -409,19 +404,25 @@ def cancel_subscription_confirm(request):
     return redirect('profile_view')
 
 
+
+
+
+
 @login_required
 def profile_edit(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)  # Обработка файлов
 
         if form.is_valid():
+            # Сохраняем данные пользователя
             user = request.user
             user.username = form.cleaned_data["username"]
             user.email = form.cleaned_data["email"]
             user.save()
 
+            # Сохраняем изменения профиля (включая фото)
             form.save()
 
             messages.success(request, "✅ Профиль успешно обновлён.")
@@ -439,8 +440,10 @@ def profile_edit(request):
 
     return render(request, 'profile_form.html', {
         'form': form,
-        'title': 'Профиль',
+        'title': 'Редактирование профиля',
     })
+
+
 
 
 def expense_categories_for_user(user):

@@ -10,9 +10,17 @@
 <section class="p-card p-card-edit">
 
   <div class="p-head">
-    <div class="p-avatar">{{ request.user.username|first|upper }}</div>
+    <div class="p-avatar">
+      {% if profile.profile_picture %}
+        <!-- Если фото профиля есть, показываем его -->
+        <img src="{{ profile.profile_picture.url }}" alt="Фото профиля" class="profile-picture">
+      {% else %}
+        <!-- Если фото нет, показываем инициалы пользователя -->
+        {{ request.user.username|first|upper }}
+      {% endif %}
+    </div>
     <div>
-      <h1>Профиль</h1>
+      <h1>Редактирование профиля</h1>
       <p class="p-sub">Вы вошли как <strong>{{ request.user.username }}</strong></p>
     </div>
   </div>
@@ -25,48 +33,71 @@
     </div>
   {% endif %}
 
-  <form method="post" class="p-form" autocomplete="off">
+  <form method="post" class="p-form" enctype="multipart/form-data" autocomplete="off">
     {% csrf_token %}
 
     <!-- Имя пользователя -->
     <label class="p-label">Имя пользователя</label>
     <div class="p-input">
       {{ form.username }}
-      {{ form.username.errors }}
+      {% if form.username.errors %}
+        <div class="error">{{ form.username.errors }}</div>
+      {% endif %}
     </div>
 
     <!-- Email -->
     <label class="p-label">Email</label>
     <div class="p-input">
       {{ form.email }}
-      {{ form.email.errors }}
+      {% if form.email.errors %}
+        <div class="error">{{ form.email.errors }}</div>
+      {% endif %}
     </div>
 
     <!-- ФИО -->
     <label class="p-label">ФИО</label>
     <div class="p-input">
       {{ form.full_name }}
-      {{ form.full_name.errors }}
+      {% if form.full_name.errors %}
+        <div class="error">{{ form.full_name.errors }}</div>
+      {% endif %}
     </div>
 
     <!-- Валюта -->
     <label class="p-label">Валюта</label>
     <div class="p-input">
       {{ form.currency }}
-      {{ form.currency.errors }}
+      {% if form.currency.errors %}
+        <div class="error">{{ form.currency.errors }}</div>
+      {% endif %}
     </div>
 
-<!-- Пароль -->
-<label class="p-label">Пароль</label>
-<div class="p-input">
-  <input
-    type="password"
-    name="password"
-    class="p-input-control"
-    placeholder="Введите новый пароль"
-  >
-</div>
+    <!-- Фото профиля -->
+    <label class="p-label">Фото профиля</label>
+    <div class="p-input">
+      <!-- Добавляем атрибут id вручную для корректного связывания с label -->
+      <div class="file-input-container">
+        <input type="file" id="profile-picture" name="profile_picture" accept="image/*">
+        <label for="profile-picture">Выберите файл</label>
+      </div>
+      <!-- Превью изображения, если оно выбрано -->
+     <!-- <img id="file-preview" class="file-preview" style="display: none;" />-->
+      {% if form.profile_picture.errors %}
+        <div class="error">{{ form.profile_picture.errors }}</div>
+      {% endif %}
+    </div>
 
+
+    <!-- Пароль -->
+    <label class="p-label">Пароль</label>
+    <div class="p-input">
+      <input
+        type="password"
+        name="password"
+        class="p-input-control"
+        placeholder="Введите новый пароль"
+      >
+    </div>
 
     <div class="p-actions mt-3">
       <button type="submit" class="btn btn-primary">Сохранить</button>
@@ -75,4 +106,18 @@
   </form>
 
 </section>
+
+<script>
+  // Сценарий для отображения превью выбранного изображения
+  document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+    var reader = new FileReader();
+    reader.onload = function(event) {
+      var imagePreview = document.getElementById('file-preview');
+      imagePreview.src = event.target.result;
+      imagePreview.style.display = 'block';
+    };
+    reader.readAsDataURL(this.files[0]);
+  });
+</script>
+
 {% endblock %}
