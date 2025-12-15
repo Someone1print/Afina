@@ -1,13 +1,16 @@
 # finance/models.py
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.db.models.functions import Lower
+from django.utils import timezone
+
 
 class IncomeCategory(models.Model):
     id = models.AutoField(primary_key=True)
-    incomeName = models.CharField(max_length=100)              # убрали unique=True
-    owner = models.ForeignKey(                                 # NULL = общая категория
+    incomeName = models.CharField(max_length=100)
+    owner = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True,
         related_name='income_categories'
     )
@@ -17,13 +20,11 @@ class IncomeCategory(models.Model):
         db_table = 'income_category'
         ordering = ['is_default', 'incomeName']
         constraints = [
-            # имя уникально среди общих (owner IS NULL), без учёта регистра
             models.UniqueConstraint(
                 Lower('incomeName'),
                 condition=Q(owner__isnull=True),
                 name='uniq_income_default_name_ci'
             ),
-            # имя уникально внутри пользователя (личные), без учёта регистра
             models.UniqueConstraint(
                 Lower('incomeName'), 'owner',
                 condition=Q(owner__isnull=False),
@@ -37,7 +38,7 @@ class IncomeCategory(models.Model):
 
 class ExpenseCategory(models.Model):
     id = models.AutoField(primary_key=True)
-    expenseName = models.CharField(max_length=100)             # убрали unique=True
+    expenseName = models.CharField(max_length=100)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True,
         related_name='expense_categories'
@@ -81,7 +82,7 @@ class Profile(models.Model):
         choices=CURRENCY_CHOICES,
         default="KGS"
     )
-    stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)  # Новое поле для хранения ID клиента в Stripe
+    stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'profile'
@@ -90,6 +91,44 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.full_name or self.user.username
+
+
+# ДОБАВЬТЕ ЭТУ МОДЕЛЬ В КОНЕЦ ФАЙЛА
+class UserSubscription(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Активная'),
+        ('past_due', 'Просрочена'),
+        ('canceled', 'Отменена'),
+        ('unpaid', 'Не оплачена'),
+        ('trialing', 'Пробный период'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='subscription')
+    stripe_subscription_id = models.CharField(max_length=255, blank=True, null=True)
+    stripe_price_id = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    current_period_start = models.DateTimeField(null=True, blank=True)
+    current_period_end = models.DateTimeField(null=True, blank=True)
+    cancel_at_period_end = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_subscription'
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f"Подписка {self.user.username} ({self.status})"
+
+    @property
+    def is_active(self):
+        """Проверяет, активна ли подписка на данный момент"""
+        if self.current_period_end and self.current_period_end > timezone.now():
+            return self.status in ['active', 'trialing'] and not self.cancel_at_period_end
+        return False
+
 
 class Income(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='incomes')
@@ -109,7 +148,7 @@ class Income(models.Model):
         verbose_name = "Доход"
         verbose_name_plural = "Доходы"
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.date}: {self.amount} ({self.category})"
 
 
@@ -131,8 +170,9 @@ class Expense(models.Model):
         verbose_name = "Расход"
         verbose_name_plural = "Расходы"
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.date}: {self.amount} ({self.category})"
+
 
 class SavingGoal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saving_goals")
@@ -157,11 +197,7 @@ class SavingGoal(models.Model):
     def progress_percent(self) -> int:
         if self.target_amount and self.target_amount != 0:
             percent = int((self.current_amount / self.target_amount) * 100)
-
-            # Ограничение, чтобы не выше 100%
             if percent > 100:
                 percent = 100
-
             return percent
-
         return 0

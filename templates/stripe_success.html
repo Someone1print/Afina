@@ -5,6 +5,69 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'Style/stripe_subscription.css' %}">
+<style>
+    .payment-status-card {
+        color: #333; /* Темный текст для всего карточки */
+    }
+
+    .subscription-details {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #dee2e6; /* Светлая граница */
+        color: #333; /* Темный текст */
+    }
+
+    .subscription-details h5 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6; /* Светлая граница */
+        color: #333;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        color: #666; /* Серый для меток */
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #333; /* Темный для значений */
+        font-weight: 600;
+    }
+
+    .status-active {
+        color: #28a745; /* Зеленый для статуса */
+        font-weight: bold;
+    }
+
+    .alert-success {
+        margin-top: 20px;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    /* Убедимся, что все тексты темные */
+    .payment-status-title,
+    .payment-status-text {
+        color: #333;
+    }
+
+    .payment-status-text {
+        color: #555;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -20,9 +83,41 @@
       Оплата прошла успешно. Премиум-функции AFINA теперь доступны в&nbsp;вашем аккаунте.
     </p>
 
-    <a href="{% url 'home' %}" class="tariff-btn premium-btn payment-status-btn">
-      Перейти на главную
-    </a>
+    <!-- Информация о подписке -->
+    {% if has_active_subscription %}
+    <div class="subscription-details">
+      <h5>Детали подписки:</h5>
+
+      <div class="detail-item">
+        <span class="detail-label">Статус:</span>
+        <span class="detail-value status-active">Активна</span>
+      </div>
+
+      {% if subscription %}
+      <div class="detail-item">
+        <span class="detail-label">Действует до:</span>
+        <span class="detail-value">{{ subscription.current_period_end|date:"d.m.Y" }}</span>
+      </div>
+      {% endif %}
+
+      <div class="detail-item">
+        <span class="detail-label">Доступ к:</span>
+        <span class="detail-value">Премиум-функциям</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Убрали блок с messages, чтобы не дублировалось -->
+    <!-- Сообщение уже показывается в заголовке -->
+
+    <div class="d-flex flex-column flex-md-row gap-3 justify-content-center mt-4">
+      <a href="{% url 'home' %}" class="tariff-btn premium-btn payment-status-btn">
+        Перейти на главную
+      </a>
+      <a href="{% url 'profile_view' %}" class="tariff-btn btn-outline-primary payment-status-btn">
+        Перейти в профиль
+      </a>
+    </div>
   </div>
 </section>
 {% endblock %}
