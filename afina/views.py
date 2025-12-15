@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegisterForm
+from .forms import RegisterForm, AddAmountForm
 from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal, UserSubscription
 from .forms import (IncomeCategoryForm, ExpenseCategoryForm, IncomeForm, ExpenseForm, ProfileForm, SavingGoalForm)
 from django.contrib.auth.decorators import login_required
@@ -938,3 +938,45 @@ def savings_update(request, pk):
         "savings_form.html",
         {"form": form, "mode": "edit", "goal": goal}
     )
+
+
+@login_required
+def add_amount_to_savings(request, pk):
+    # Получаем цель накопления
+    goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        form = AddAmountForm(request.POST)
+        if form.is_valid():
+            # Получаем сумму для добавления
+            amount_to_add = form.cleaned_data['amount_to_add']
+
+            # Добавляем сумму к текущей
+            goal.current_amount += amount_to_add
+            goal.save()
+
+            # Создаем новый расход
+            try:
+                expense_category = ExpenseCategory.objects.get(expenseName="Накопление")
+
+                Expense.objects.create(
+                    user=request.user,
+                    category=expense_category,
+                    amount=amount_to_add,
+                    date=timezone.now(),
+                    note="Пополнение цели накопления"
+                )
+                messages.success(request, f"✅ Сумма {amount_to_add} успешно добавлена в копилку.")
+            except ExpenseCategory.DoesNotExist:
+                messages.error(request, "❌ Ошибка: Категория 'Накопление' не найдена.")
+
+            return redirect("savings_list")  # Перенаправление на страницу списка копилок
+    else:
+        form = AddAmountForm()
+
+    return render(request, "add_amount_to_savings.html", {
+        "form": form,
+        "goal": goal
+    })
+
+

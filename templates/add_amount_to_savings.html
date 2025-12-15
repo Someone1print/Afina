@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}  <!-- Перемещаем сюда, чтобы корректно загрузить тег static -->
+
+{% block title %}Добавить сумму в копилку{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/savings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>Добавить сумму в копилку: {{ goal.title }}</h2>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {% if 'error' in message.tags %}error{% else %}success{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="id_amount_to_add">Сумма для добавления:</label>
+      {{ form.amount_to_add }}
+      {% if form.amount_to_add.errors %}
+        <div class="error-message">
+          {% for error in form.amount_to_add.errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Добавить сумму</button>
+  </form>
+
+  <div class="back-link">
+    <a href="{% url 'savings_list' %}">Назад к копилкам</a>
+  </div>
+</div>
+{% endblock %}
