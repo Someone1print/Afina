@@ -1,10 +1,9 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import RegisterForm
-from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal
-from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm, SavingGoalForm)
+from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal, UserSubscription
+from .forms import (IncomeCategoryForm, ExpenseCategoryForm, IncomeForm, ExpenseForm, ProfileForm, SavingGoalForm)
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum, F
 from django.contrib import messages
@@ -16,23 +15,22 @@ import stripe
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
-from django.shortcuts import render
-from .utils import is_subscription_active  # Импортируем функцию для проверки подписки
 from django.utils import timezone
 from datetime import timedelta
+from datetime import datetime
 
 # Регистрация
-# metodi bystroy razrabotki
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # автоматически залогинивает
-            return redirect('home')  # куда хочешь после регистрации
+            login(request, user)
+            return redirect('home')
     else:
         form = RegisterForm()
     return render(request, 'register.html', {'form': form})
+
 
 # Логин
 def login_view(request):
@@ -41,46 +39,52 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            print("Successfully logged in")
             return redirect('home')
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
+
 # Логаут
 @login_required
 def logout_view(request):
     logout(request)
-    print("Вы вышли из системы")
     return redirect('login')
 
 
 def home_view(request):
     user = request.user
     # Проверяем, есть ли у пользователя активная подписка
-    has_active_subscription = is_subscription_active(user)
+    try:
+        subscription = UserSubscription.objects.get(user=user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
 
     # Рендерим главную страницу с информацией о подписке
     return render(request, 'home.html', {
-        'has_active_subscription': has_active_subscription,  # Передаем переменную в шаблон
+        'has_active_subscription': has_active_subscription,
     })
+
+
 # -------------------------
 # IncomeCategory CRUD views
 # -------------------------
 @login_required
 def income_category_list(request):
     qs = income_categories_for_user(request.user)
-    paginator = Paginator(qs, 6)               # по 8 записей на страницу
+    paginator = Paginator(qs, 6)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number) # безопасно: сам обрабатывает мусорные значения
+    page_obj = paginator.get_page(page_number)
 
     ctx = {
-        'categories': page_obj.object_list,    # чтобы твой шаблон продолжал работать
+        'categories': page_obj.object_list,
         'page_obj': page_obj,
         'paginator': paginator,
         'is_paginated': page_obj.has_other_pages(),
     }
     return render(request, 'income_category_list.html', ctx)
+
 
 @login_required
 def income_category_create(request):
@@ -133,8 +137,6 @@ def income_category_delete(request, pk):
     return render(request, 'income_category_confirm_delete.html', {'category': category})
 
 
-
-
 # -------- ExpenseCategory CRUD --------
 @login_required
 def expense_category_list(request):
@@ -150,6 +152,8 @@ def expense_category_list(request):
         'is_paginated': page_obj.has_other_pages(),
     }
     return render(request, 'expense_category_list.html', ctx)
+
+
 @login_required
 def expense_category_create(request):
     if request.method == 'POST':
@@ -164,6 +168,7 @@ def expense_category_create(request):
     else:
         form = ExpenseCategoryForm()
     return render(request, 'expense_category_form.html', {'form': form, 'title': 'Добавить категорию расходов'})
+
 
 @login_required
 def expense_category_update(request, pk):
@@ -182,11 +187,11 @@ def expense_category_update(request, pk):
         form = ExpenseCategoryForm(instance=category)
     return render(request, 'expense_category_form.html', {'form': form, 'title': 'Изменить категорию расходов'})
 
+
 @login_required
 def expense_category_delete(request, pk):
     category = get_object_or_404(ExpenseCategory, pk=pk)
 
-    # Проверяем: если дефолтная или не твоя — просто показываем всплывающее сообщение и возвращаемся
     if category.owner != request.user or (category.is_default and category.expenseName.lower() == 'другое'):
         messages.error(request, "❌ Нельзя удалить общие или дефолтные категории.")
         return redirect('expense_category_list')
@@ -198,7 +203,6 @@ def expense_category_delete(request, pk):
         return redirect('expense_category_list')
 
     return render(request, 'expense_category_confirm_delete.html', {'category': category})
-
 
 
 # -------- Income CRUD --------
@@ -217,6 +221,8 @@ def income_list(request):
         'page_obj': page_obj,
     }
     return render(request, 'income_list.html', context)
+
+
 @login_required
 def income_create(request):
     if request.method == 'POST':
@@ -230,6 +236,7 @@ def income_create(request):
         form = IncomeForm(user=request.user)
     return render(request, 'income_form.html', {'form': form, 'title': 'Добавить доход'})
 
+
 @login_required
 def income_update(request, pk):
     item = get_object_or_404(Income, pk=pk, user=request.user)
@@ -242,6 +249,7 @@ def income_update(request, pk):
         form = IncomeForm(instance=item, user=request.user)
     return render(request, 'income_form.html', {'form': form, 'title': 'Изменить доход'})
 
+
 @login_required
 def income_delete(request, pk):
     item = get_object_or_404(Income, pk=pk, user=request.user)
@@ -249,6 +257,7 @@ def income_delete(request, pk):
         item.delete()
         return redirect('income_list')
     return render(request, 'income_confirm_delete.html', {'item': item})
+
 
 # -------- Expense CRUD --------
 @login_required
@@ -266,6 +275,8 @@ def expense_list(request):
         'page_obj': page_obj,
     }
     return render(request, 'expense_list.html', context)
+
+
 @login_required
 def expense_create(request):
     if request.method == 'POST':
@@ -279,6 +290,7 @@ def expense_create(request):
         form = ExpenseForm(user=request.user)
     return render(request, 'expense_form.html', {'form': form, 'title': 'Добавить расход'})
 
+
 @login_required
 def expense_update(request, pk):
     item = get_object_or_404(Expense, pk=pk, user=request.user)
@@ -290,6 +302,7 @@ def expense_update(request, pk):
     else:
         form = ExpenseForm(instance=item, user=request.user)
     return render(request, 'expense_form.html', {'form': form, 'title': 'Изменить расход'})
+
 
 @login_required
 def expense_delete(request, pk):
@@ -303,9 +316,92 @@ def expense_delete(request, pk):
 @login_required
 def profile_view(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    # Получаем подписку пользователя
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        subscription = None
+        has_active_subscription = False
+
     return render(request, 'profile_view.html', {
         'profile': profile,
+        'has_active_subscription': has_active_subscription,
+        'subscription': subscription,
     })
+
+
+@login_required
+def cancel_subscription_view(request):
+    """Страница подтверждения отмены подписки"""
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+
+        if not subscription.is_active:
+            messages.warning(request, "У вас нет активной подписки.")
+            return redirect('profile_view')
+    except UserSubscription.DoesNotExist:
+        messages.warning(request, "У вас нет активной подписки.")
+        return redirect('profile_view')
+
+    context = {
+        'subscription': subscription,
+        'has_active_subscription': True,
+    }
+    return render(request, 'subscription_cancel_confirm.html', context)
+
+
+@login_required
+def cancel_subscription_confirm(request):
+    """Подтверждение отмены подписки"""
+    if request.method != 'POST':
+        return redirect('profile_view')
+
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+
+        if not subscription.is_active:
+            messages.warning(request, "У вас нет активной подписки.")
+            return redirect('profile_view')
+    except UserSubscription.DoesNotExist:
+        messages.warning(request, "У вас нет активной подписки.")
+        return redirect('profile_view')
+
+    try:
+        # Инициализируем Stripe
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+
+        # Если есть stripe_subscription_id, отменяем в Stripe
+        if subscription.stripe_subscription_id:
+            stripe.Subscription.modify(
+                subscription.stripe_subscription_id,
+                cancel_at_period_end=True
+            )
+
+            # Обновляем статус в базе данных
+            subscription.cancel_at_period_end = True
+            subscription.status = 'active'
+            subscription.save()
+
+            messages.success(
+                request,
+                f"✅ Подписка будет отменена {subscription.current_period_end.strftime('%d.%m.%Y')}. "
+                f"Вы сохраните доступ до этой даты."
+            )
+        else:
+            # Если нет Stripe ID, просто помечаем как отмененную
+            subscription.cancel_at_period_end = True
+            subscription.status = 'canceled'
+            subscription.save()
+            messages.success(request, "✅ Подписка отменена.")
+
+    except stripe.error.StripeError as e:
+        messages.error(request, f"❌ Ошибка Stripe: {str(e)}")
+    except Exception as e:
+        messages.error(request, f"❌ Произошла ошибка: {str(e)}")
+
+    return redirect('profile_view')
 
 
 @login_required
@@ -316,13 +412,11 @@ def profile_edit(request):
         form = ProfileForm(request.POST, instance=profile)
 
         if form.is_valid():
-            # сначала обновляем User
             user = request.user
             user.username = form.cleaned_data["username"]
             user.email = form.cleaned_data["email"]
             user.save()
 
-            # потом профиль
             form.save()
 
             messages.success(request, "✅ Профиль успешно обновлён.")
@@ -347,11 +441,12 @@ def profile_edit(request):
 def expense_categories_for_user(user):
     return ExpenseCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'expenseName')
 
+
 def income_categories_for_user(user):
     return IncomeCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'incomeName')
 
-#Создание графиков для доходов
 
+# Создание графиков для доходов
 @login_required
 def expense_by_category_api(request):
     qs = Expense.objects.filter(user=request.user)
@@ -370,6 +465,7 @@ def expense_by_category_api(request):
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
 
+
 @login_required
 def expense_by_month_api(request):
     qs = Expense.objects.filter(user=request.user)
@@ -385,12 +481,12 @@ def expense_by_month_api(request):
              .annotate(total=Sum('amount'))
              .order_by('m'))
 
-    labels = [row['m'].strftime('%b %Y') for row in agg]  # например: "Ноя 2025"
+    labels = [row['m'].strftime('%b %Y') for row in agg]
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
 
-#Создание графиков для расходов
 
+# Создание графиков для расходов
 @login_required
 def income_by_category_api(request):
     qs = Income.objects.filter(user=request.user)
@@ -408,6 +504,7 @@ def income_by_category_api(request):
     labels = [row['category__incomeName'] for row in agg]
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
+
 
 @login_required
 def income_by_month_api(request):
@@ -428,59 +525,154 @@ def income_by_month_api(request):
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
 
+
 @login_required
 def stripe_test_view(request):
     context = {
-        "stripe_public_key": settings.STRIPE_PUBLISHABLE_KEY,  # <-- имя такое
+        "stripe_public_key": settings.STRIPE_PUBLISHABLE_KEY,
     }
     return render(request, "stripe_test.html", context)
 
 
-
 @csrf_exempt
 @login_required
-# Когда происходит создание платежа
 def create_checkout_session(request):
-    email = request.user.email  # Получаем email текущего пользователя
+    email = request.user.email
 
     # Проверяем, существует ли клиент в Stripe
-    existing_customer = stripe.Customer.list(email=email).data
-    if existing_customer:
-        customer_id = existing_customer[0].id  # Используем ID существующего клиента
+    existing_customers = stripe.Customer.list(email=email, limit=1).data
+
+    if existing_customers:
+        customer_id = existing_customers[0].id
     else:
-        # Создаем нового клиента, если не найден
+        # Создаем нового клиента
         customer = stripe.Customer.create(
             email=email,
             name=request.user.username,
+            metadata={
+                'user_id': str(request.user.id),
+                'username': request.user.username
+            }
         )
         customer_id = customer.id
 
-    # Продолжаем с созданием сессии на основе найденного или созданного клиента
-    checkout_session = stripe.checkout.Session.create(
-        customer=customer_id,  # Используем customer_id
-        mode="subscription",
-        line_items=[{
-            "price": settings.STRIPE_PRICE_ID,  # price_xxx из Stripe
-            "quantity": 1,
-        }],
-        success_url=request.build_absolute_uri(reverse("stripe_success")) + "?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url=request.build_absolute_uri(reverse("stripe_cancel")),
-    )
+        # Сохраняем customer_id в профиль пользователя
+        profile, created = Profile.objects.get_or_create(user=request.user)
+        profile.stripe_customer_id = customer_id
+        profile.save()
 
-    return JsonResponse({"id": checkout_session.id})
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            customer=customer_id,
+            customer_update={
+                'address': 'auto',
+                'name': 'auto'
+            },
+            mode="subscription",
+            line_items=[{
+                "price": settings.STRIPE_PRICE_ID,
+                "quantity": 1,
+            }],
+            metadata={
+                'user_id': str(request.user.id),
+                'username': request.user.username
+            },
+            success_url=request.build_absolute_uri(
+                reverse("stripe_success")
+            ) + "?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=request.build_absolute_uri(reverse("stripe_cancel")),
+        )
+
+        return JsonResponse({"id": checkout_session.id})
+
+    except stripe.error.StripeError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
 
 @login_required
 def stripe_success_view(request):
-    return render(request, "stripe_success.html")
+    session_id = request.GET.get('session_id')
+
+    # Проверяем текущую подписку пользователя
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        subscription = None
+        has_active_subscription = False
+
+    if session_id:
+        try:
+            # Получаем информацию о сессии из Stripe
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            session = stripe.checkout.Session.retrieve(session_id)
+
+            if session.mode == 'subscription' and session.payment_status == 'paid':
+                # Получаем подписку из Stripe
+                subscription_info = stripe.Subscription.retrieve(session.subscription)
+
+                # Сохраняем customer_id в профиль
+                profile, _ = Profile.objects.get_or_create(user=request.user)
+                if session.customer:
+                    profile.stripe_customer_id = session.customer
+                    profile.save()
+
+                # Определяем даты (30 дней от текущей даты)
+                from datetime import datetime, timedelta
+                now = datetime.now()
+                period_end = now + timedelta(days=30)
+
+                # Получаем price_id безопасно
+                stripe_price_id = None
+                if hasattr(subscription_info, 'items') and subscription_info.items:
+                    # Если items это список
+                    if isinstance(subscription_info.items, list) and len(subscription_info.items) > 0:
+                        stripe_price_id = subscription_info.items[0].price.id
+                    # Если items это объект с data
+                    elif hasattr(subscription_info.items, 'data') and subscription_info.items.data:
+                        stripe_price_id = subscription_info.items.data[0].price.id
+
+                # Создаем или обновляем подписку пользователя
+                user_subscription, created = UserSubscription.objects.update_or_create(
+                    user=request.user,
+                    defaults={
+                        'stripe_subscription_id': subscription_info.id,
+                        'stripe_price_id': stripe_price_id,
+                        'status': 'active',
+                        'current_period_start': now,
+                        'current_period_end': period_end,
+                        'cancel_at_period_end': False,
+                    }
+                )
+
+                messages.success(request, "✅ Подписка успешно активирована на 30 дней!")
+                has_active_subscription = True
+                subscription = user_subscription  # Обновляем переменную subscription
+
+        except stripe.error.StripeError as e:
+            messages.error(request, f"❌ Ошибка Stripe: {str(e)}")
+        except Exception as e:
+            messages.error(request, f"❌ Произошла ошибка: {str(e)}")
+
+    return render(request, "stripe_success.html", {
+        'has_active_subscription': has_active_subscription,
+        'subscription': subscription,
+    })
 
 
 @login_required
 def stripe_cancel_view(request):
     return render(request, "stripe_cancel.html")
 
+
 @login_required
 def savings_list(request):
-    has_active_subscription = is_subscription_active(request.user)
+    # Проверяем подписку напрямую
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
 
     qs = SavingGoal.objects.filter(user=request.user)
     active_goals = qs.filter(current_amount__lt=F("target_amount"))
@@ -494,10 +686,14 @@ def savings_list(request):
     return render(request, "savings_list.html", context)
 
 
-
 @login_required
 def savings_create(request):
-    has_active_subscription = is_subscription_active(request.user)
+    # Проверяем подписку напрямую
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
 
     if request.method == "POST":
         form = SavingGoalForm(request.POST)
@@ -518,7 +714,12 @@ def savings_create(request):
 
 @login_required
 def savings_update(request, pk):
-    has_active_subscription = is_subscription_active(request.user)
+    # Проверяем подписку напрямую
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
 
     goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
 
@@ -539,7 +740,12 @@ def savings_update(request, pk):
 
 @login_required
 def savings_delete(request, pk):
-    has_active_subscription = is_subscription_active(request.user)
+    # Проверяем подписку напрямую (если нужно для логики)
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
 
     goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
 
@@ -548,10 +754,9 @@ def savings_delete(request, pk):
         return redirect("savings_list")
 
     return redirect("savings_list")
-    # в шаблон тут не рендерим, так что флаг не нужен
-# --- DASHBOARD API (новые эндпоинты) ---
 
-# 1. Расходы по дням (последние 7 дней)
+
+# --- DASHBOARD API ---
 def dashboard_expenses_by_day_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
@@ -564,7 +769,6 @@ def dashboard_expenses_by_day_api(request):
         date__range=[start_date, end_date]
     ).values('date').annotate(total=Sum('amount')).order_by('date')
 
-    # Словарь: день недели → сумма
     day_data = {(start_date + timedelta(days=i)): 0 for i in range(7)}
     for item in expenses:
         day_data[item['date']] = float(item['total'])
@@ -578,7 +782,6 @@ def dashboard_expenses_by_day_api(request):
     })
 
 
-# 2. Расходы по категориям (круговая диаграмма)
 def dashboard_expenses_by_category_pie_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
@@ -596,19 +799,16 @@ def dashboard_expenses_by_category_pie_api(request):
     categories = []
     amounts = []
     other_amount = 0.0
+    total = 0.0
 
-    total = 0.0  # общая сумма
-
-    # Переводим Decimal → float
     for item in expenses:
         amount = float(item['total'] or 0)
         total += amount
 
-    # Теперь безопасно делим
     for item in expenses:
         name = item['category__expenseName'] or "Без категории"
         amount = float(item['total'] or 0)
-        if total > 0 and (amount / total) < 0.03:  # < 3% → в "Другое"
+        if total > 0 and (amount / total) < 0.03:
             other_amount += amount
         else:
             categories.append(name)
@@ -618,7 +818,6 @@ def dashboard_expenses_by_category_pie_api(request):
         categories.append("Другое")
         amounts.append(other_amount)
 
-    # Если вообще нет расходов — покажем заглушку
     if total == 0:
         categories = ["Нет расходов"]
         amounts = [1]
@@ -629,7 +828,6 @@ def dashboard_expenses_by_category_pie_api(request):
     })
 
 
-# 3. Доходы по дням (последние 7 дней)
 def dashboard_income_by_day_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
@@ -655,7 +853,6 @@ def dashboard_income_by_day_api(request):
     })
 
 
-# 4. Доходы по категориям (текущий месяц)
 def dashboard_income_by_category_pie_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)

@@ -87,5 +87,10 @@ urlpatterns = [
     path("savings/new/", views.savings_create, name="savings_create"),
     path("savings/<int:pk>/edit/", views.savings_update, name="savings_update"),
     path("savings/<int:pk>/delete/", views.savings_delete, name="savings_delete"),
+
+# Подписка
+    path('subscription/cancel/', views.cancel_subscription_view, name='cancel_subscription'),
+    path('subscription/cancel/confirm/', views.cancel_subscription_confirm, name='cancel_subscription_confirm'),
+    #path('stripe/webhook/', webhooks.stripe_webhook, name='stripe_webhook'),
 ]
 
