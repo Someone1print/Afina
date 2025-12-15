@@ -67,6 +67,7 @@ urlpatterns = [
     path('expenses/by-category/', views.expense_by_category_api, name='expense_by_category_api'),
     path('expenses/by-month/', views.expense_by_month_api, name='expense_by_month_api'),
 
+
     # Profile
     path('profile/', views.profile_view, name='profile_view'),
     path('profile/edit/', views.profile_edit, name='profile_edit'),
