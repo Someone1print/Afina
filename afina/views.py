@@ -945,11 +945,21 @@ def add_amount_to_savings(request, pk):
     # Получаем цель накопления
     goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
 
+    # Проверяем, если цель уже достигнута
+    if goal.current_amount >= goal.target_amount:
+        messages.error(request, "❌ Цель уже достигнута. Невозможно добавить больше средств.")
+        return redirect("savings_list")
+
     if request.method == "POST":
         form = AddAmountForm(request.POST)
         if form.is_valid():
             # Получаем сумму для добавления
             amount_to_add = form.cleaned_data['amount_to_add']
+
+            # Проверяем, чтобы сумма не превышала целевую сумму
+            if goal.current_amount + amount_to_add > goal.target_amount:
+                messages.error(request, f"❌ Вы не можете добавить более {goal.target_amount - goal.current_amount} KGS.")
+                return redirect("savings_list")
 
             # Добавляем сумму к текущей
             goal.current_amount += amount_to_add
@@ -978,5 +988,6 @@ def add_amount_to_savings(request, pk):
         "form": form,
         "goal": goal
     })
+
 
 
