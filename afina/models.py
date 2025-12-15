@@ -7,6 +7,7 @@ from django.db.models.functions import Lower
 from django.utils import timezone
 
 
+
 class IncomeCategory(models.Model):
     id = models.AutoField(primary_key=True)
     incomeName = models.CharField(max_length=100)
@@ -201,3 +202,5 @@ class SavingGoal(models.Model):
                 percent = 100
             return percent
         return 0
+
+
