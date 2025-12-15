@@ -18,7 +18,9 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from datetime import datetime
-
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import ProfileForm
 # Регистрация
 def register_view(request):
     if request.method == 'POST':
@@ -404,19 +406,25 @@ def cancel_subscription_confirm(request):
     return redirect('profile_view')
 
 
+
+
+
+
 @login_required
 def profile_edit(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)  # Обработка файлов
 
         if form.is_valid():
+            # Сохраняем данные пользователя
             user = request.user
             user.username = form.cleaned_data["username"]
             user.email = form.cleaned_data["email"]
             user.save()
 
+            # Сохраняем изменения профиля (включая фото)
             form.save()
 
             messages.success(request, "✅ Профиль успешно обновлён.")
@@ -434,8 +442,10 @@ def profile_edit(request):
 
     return render(request, 'profile_form.html', {
         'form': form,
-        'title': 'Профиль',
+        'title': 'Редактирование профиля',
     })
+
+
 
 
 def expense_categories_for_user(user):

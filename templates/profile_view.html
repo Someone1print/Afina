@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block title %}Профиль — AFINA{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'Style/Profile.css' %}">
 <style>
@@ -27,13 +28,28 @@
         background-color: #f87171;
         color: white;
     }
+
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <section class="p-card">
   <div class="p-head">
-    <div class="p-avatar">{{ request.user.username|first|upper }}</div>
+    <div class="p-avatar">
+      {% if profile.profile_picture %}
+        <!-- Если фото профиля есть, показываем его -->
+        <img src="{{ profile.profile_picture.url }}" alt="Фото профиля" class="profile-picture">
+      {% else %}
+        <!-- Если фото нет, показываем инициалы пользователя -->
+        {{ request.user.username|first|upper }}
+      {% endif %}
+    </div>
     <div>
       <h1>Профиль</h1>
       <p class="p-sub">Вы вошли как <strong>{{ request.user.username }}</strong></p>
@@ -90,7 +106,6 @@
     <a href="{% url 'profile_edit' %}" class="btn btn-primary">Редактировать профиль</a>
 
     {% if has_active_subscription and not subscription.cancel_at_period_end %}
-      <!-- Убрали payment_history пока что -->
       <a href="{% url 'cancel_subscription' %}" class="btn btn-danger">
         Отменить подписку
       </a>

@@ -83,6 +83,7 @@ class Profile(models.Model):
         default="KGS"
     )
     stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
 
     class Meta:
         db_table = 'profile'
