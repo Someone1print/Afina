@@ -17,6 +17,8 @@ Including another URLconf
 
 # from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -93,5 +95,5 @@ urlpatterns = [
     path('subscription/cancel/', views.cancel_subscription_view, name='cancel_subscription'),
     path('subscription/cancel/confirm/', views.cancel_subscription_confirm, name='cancel_subscription_confirm'),
     #path('stripe/webhook/', webhooks.stripe_webhook, name='stripe_webhook'),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
