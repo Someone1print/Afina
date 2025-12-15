@@ -11,6 +11,37 @@
   {% block extra_css %}{% endblock %}
 </head>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // скрываем ВСЕ help_text по умолчанию
+  document.querySelectorAll('.helptext').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  // обрабатываем все input в форме
+  document.querySelectorAll('.auth-card input').forEach(input => {
+
+    const helpId = input.getAttribute('aria-describedby');
+    if (!helpId) return;
+
+    const help = document.getElementById(helpId);
+    if (!help) return;
+
+    // показать при фокусе
+    input.addEventListener('focus', () => {
+      help.style.display = 'block';
+    });
+
+    // скрыть при уходе
+    input.addEventListener('blur', () => {
+      help.style.display = 'none';
+    });
+  });
+});
+</script>
+
+
 <body>
 <header class="site-header">
   <div class="container nav">
