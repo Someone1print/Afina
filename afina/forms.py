@@ -152,3 +152,6 @@ class SavingGoalForm(forms.ModelForm):
             "target_amount": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "current_amount": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
         }
+
+class AddAmountForm(forms.Form):
+    amount_to_add = forms.DecimalField(max_digits=12, decimal_places=2, min_value=0.01, label="Сумма для добавления")

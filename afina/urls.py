@@ -89,6 +89,7 @@ urlpatterns = [
     path("savings/new/", views.savings_create, name="savings_create"),
     path("savings/<int:pk>/edit/", views.savings_update, name="savings_update"),
     path("savings/<int:pk>/delete/", views.savings_delete, name="savings_delete"),
+    path('savings/<int:pk>/add/', views.add_amount_to_savings, name='add_amount_to_savings'),
 
 # Подписка
     path('subscription/cancel/', views.cancel_subscription_view, name='cancel_subscription'),
