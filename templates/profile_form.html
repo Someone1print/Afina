@@ -56,12 +56,17 @@
       {{ form.currency.errors }}
     </div>
 
-    <!-- Пароль (пока просто заглушка) -->
-    <label class="p-label">Пароль</label>
-    <div class="p-input p-pass-wrapper">
-      <input type="password" class="p-input-control" value="********" disabled>
-      <!-- потом можно сделать отдельную форму/страницу смены пароля -->
-    </div>
+<!-- Пароль -->
+<label class="p-label">Пароль</label>
+<div class="p-input">
+  <input
+    type="password"
+    name="password"
+    class="p-input-control"
+    placeholder="Введите новый пароль"
+  >
+</div>
+
 
     <div class="p-actions mt-3">
       <button type="submit" class="btn btn-primary">Сохранить</button>
