@@ -4,7 +4,8 @@
 
 /* Секция с графиками */
 .dashboard-section {
-    padding: 60px 20px 20px;/* светлый фон под карточкой */
+    padding: 60px 20px 20px;
+    /* светлый фон под карточкой */
     background: transparent;
 }
 
@@ -24,11 +25,13 @@
     font-size: 2rem;
     font-weight: 700;
     margin: 0 0 50px 0;
-    color: #1e3c72; /* синий как в хедере */
+    color: #1e3c72;
+    /* синий как в хедере */
 }
 
 .dashboard-title.income {
-    color: #2e7d32; /* зелёный для доходов */
+    color: #2e7d32;
+    /* зелёный для доходов */
 }
 
 /* Сетка 2х2 для графиков */
@@ -45,7 +48,7 @@
     border-radius: 24px;
     padding: 36px 32px;
     border: 1px solid #eef2f8;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
 }
 
 /* Заголовок внутри мини-карточки */
@@ -119,3 +122,5 @@
         margin-bottom: 24px;
     }
 }
+
+

@@ -12,6 +12,8 @@ from django.core.paginator import Paginator
 from django.db.models.functions import TruncMonth
 from django.utils.dateparse import parse_date
 import stripe
+from django.db.models.functions import ExtractWeekDay
+from django.db.models import Sum
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
@@ -763,33 +765,31 @@ def savings_delete(request, pk):
 
     return redirect("savings_list")
 
-
 # --- DASHBOARD API ---
+@login_required
 def dashboard_expenses_by_day_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
 
-    end_date = timezone.now().date()
-    start_date = end_date - timedelta(days=6)
-
-    expenses = Expense.objects.filter(
-        user=request.user,
-        date__range=[start_date, end_date]
-    ).values('date').annotate(total=Sum('amount')).order_by('date')
+    # Получаем расходы пользователя
+    expenses = Expense.objects.filter(user=request.user)
 
     day_data = {(start_date + timedelta(days=i)): 0 for i in range(7)}
     for item in expenses:
         day_data[item['date']] = float(item['total'])
 
-    days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-    amounts = [day_data[start_date + timedelta(days=i)] for i in range(7)]
+    # Заполняем массив с суммами по дням недели
+    for expense in expenses:
+        # Используем метод weekday() для получения дня недели (Пн=0, Вт=1, Ср=2 и т.д.)
+        day_of_week = expense.date.weekday()  # 0 - Понедельник, 6 - Воскресенье
+        amounts[day_of_week] += float(expense.amount)
 
     return JsonResponse({
-        "days": days,
+        "days": days_of_week,
         "amounts": amounts
     })
 
-
+@login_required
 def dashboard_expenses_by_category_pie_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
@@ -836,31 +836,31 @@ def dashboard_expenses_by_category_pie_api(request):
     })
 
 
+# 3. Доходы по дням (последние 7 дней)
+@login_required
 def dashboard_income_by_day_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
 
-    end_date = timezone.now().date()
-    start_date = end_date - timedelta(days=6)
+    # Получаем доходы пользователя
+    incomes = Income.objects.filter(user=request.user)
 
-    incomes = Income.objects.filter(
-        user=request.user,
-        date__range=[start_date, end_date]
-    ).values('date').annotate(total=Sum('amount')).order_by('date')
+    # Составляем список дней недели (Пн, Вт, Ср, Чт, Пт, Сб, Вс)
+    days_of_week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+    amounts = [0] * 7  # 7 дней недели, начинаем с нулей
 
-    day_data = {(start_date + timedelta(days=i)): 0 for i in range(7)}
-    for item in incomes:
-        day_data[item['date']] = float(item['total'] or 0)
-
-    days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-    amounts = [day_data[start_date + timedelta(days=i)] for i in range(7)]
+    # Заполняем массив с суммами по дням недели
+    for income in incomes:
+        # Используем метод weekday() для получения дня недели (Пн=0, Вт=1, Ср=2 и т.д.)
+        day_of_week = income.date.weekday()  # 0 - Понедельник, 6 - Воскресенье
+        amounts[day_of_week] += float(income.amount)
 
     return JsonResponse({
-        "days": days,
+        "days": days_of_week,
         "amounts": amounts
     })
 
-
+@login_required
 def dashboard_income_by_category_pie_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
