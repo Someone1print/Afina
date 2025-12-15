@@ -122,18 +122,21 @@ class ProfileForm(forms.ModelForm):
     # поля пользователя
     username = forms.CharField(label="Имя пользователя", max_length=150)
     email = forms.EmailField(label="Email", required=False)
+    profile_picture = forms.ImageField(label="Фото профиля", required=False)  # Новое поле для фото
 
     class Meta:
         model = Profile
-        fields = ["full_name", "currency"]  # только поля из Profile!
+        fields = ["full_name", "currency", "profile_picture"]  # Добавляем поле для изображения
         labels = {
             "full_name": "ФИО",
             "currency": "Валюта",
+            "profile_picture": "Фото профиля"  # Метка для нового поля
         }
         widgets = {
             "full_name": forms.TextInput(attrs={"class": "p-input-control"}),
             "currency": forms.Select(attrs={"class": "p-input-control"}),
         }
+
 
 class SavingGoalForm(forms.ModelForm):
     class Meta:
@@ -149,3 +152,6 @@ class SavingGoalForm(forms.ModelForm):
             "target_amount": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "current_amount": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
         }
+
+class AddAmountForm(forms.Form):
+    amount_to_add = forms.DecimalField(max_digits=12, decimal_places=2, min_value=0.01, label="Сумма для добавления")

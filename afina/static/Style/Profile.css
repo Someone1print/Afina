@@ -261,22 +261,54 @@
   font-size: 14px;
 }
 
-/* адаптив */
-@media (max-width: 640px) {
-  .p-card-edit {
-    padding: 20px 18px 24px;
-  }
+/* ====== Стили для загрузки фото профиля ====== */
 
-  .p-form-row {
-    grid-template-columns: 1fr;
-    row-gap: 6px;
-  }
-
-  .p-label {
-    font-size: 14px;
-  }
-
-  .p-edit-actions {
-    flex-direction: column;
-  }
+/* Стиль для контейнера выбора файла */
+.file-input-container {
+  position: relative;
+  width: 200px;
+  height: 40px;
+  margin-top: 10px;
 }
+
+/* Скрытие стандартного input для выбора файла */
+.file-input-container input[type="file"] {
+  display: none;
+}
+
+/* Стиль кастомной кнопки для выбора файла */
+.file-input-container label {
+  display: block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+/* Эффект при наведении на кнопку */
+.file-input-container label:hover {
+  background-color: #0056b3;
+}
+
+/* Стиль для превью изображения */
+.file-preview {
+  display: block;
+  margin-top: 10px;
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Стили для отображения ошибок в форме */
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+{% endblock %}

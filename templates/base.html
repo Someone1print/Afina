@@ -12,6 +12,37 @@
   {% block extra_css %}{% endblock %}
 </head>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // скрываем ВСЕ help_text по умолчанию
+  document.querySelectorAll('.helptext').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  // обрабатываем все input в форме
+  document.querySelectorAll('.auth-card input').forEach(input => {
+
+    const helpId = input.getAttribute('aria-describedby');
+    if (!helpId) return;
+
+    const help = document.getElementById(helpId);
+    if (!help) return;
+
+    // показать при фокусе
+    input.addEventListener('focus', () => {
+      help.style.display = 'block';
+    });
+
+    // скрыть при уходе
+    input.addEventListener('blur', () => {
+      help.style.display = 'none';
+    });
+  });
+});
+</script>
+
+
 <body>
 <header class="site-header">
   <div class="container nav">
@@ -35,6 +66,9 @@
 
       <li><a href="{% url 'income_list' %}">Доходы</a></li>
       <li><a href="{% url 'expense_list' %}">Расходы</a></li>
+
+      <!-- ДОБАВЛЕН ПУНКТ "ПОДПИСКА" -->
+      <li><a href="{% url 'stripe_test' %}">Подписка</a></li>
 
       {% if user.is_authenticated %}
         <!-- ПУНКТ ПРОФИЛЯ С ВЫПАДАЮЩИМ МЕНЮ -->
@@ -66,7 +100,7 @@
 
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
-              <button type="submit" class="user-menu__item user-menu__item--danger">
+              <button type="submit" class="user-menuitem user-menuitem--danger">
                 Выход
               </button>
             </form>
@@ -100,6 +134,8 @@
       <li><a href="{% url 'home' %}">Главная</a></li>
       <li><a href="{% url 'income_category_list' %}">Категории</a></li>
       <li><a href="{% url 'profile_view' %}">Профиль</a></li>
+      <!-- ДОБАВЛЕНО В ФУТЕР -->
+      <li><a href="{% url 'stripe_test' %}">Подписка</a></li>
     </ul>
   </div>
 </footer>
