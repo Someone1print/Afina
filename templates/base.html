@@ -35,6 +35,9 @@
       <li><a href="{% url 'income_list' %}">Доходы</a></li>
       <li><a href="{% url 'expense_list' %}">Расходы</a></li>
 
+      <!-- ДОБАВЛЕН ПУНКТ "ПОДПИСКА" -->
+      <li><a href="{% url 'stripe_test' %}">Подписка</a></li>
+
       {% if user.is_authenticated %}
         <!-- ПУНКТ ПРОФИЛЯ С ВЫПАДАЮЩИМ МЕНЮ -->
         <li class="nav-user">
@@ -65,7 +68,7 @@
 
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
-              <button type="submit" class="user-menu__item user-menu__item--danger">
+              <button type="submit" class="user-menuitem user-menuitem--danger">
                 Выход
               </button>
             </form>
@@ -99,6 +102,8 @@
       <li><a href="{% url 'home' %}">Главная</a></li>
       <li><a href="{% url 'income_category_list' %}">Категории</a></li>
       <li><a href="{% url 'profile_view' %}">Профиль</a></li>
+      <!-- ДОБАВЛЕНО В ФУТЕР -->
+      <li><a href="{% url 'stripe_test' %}">Подписка</a></li>
     </ul>
   </div>
 </footer>
