@@ -765,29 +765,35 @@ def savings_delete(request, pk):
 
     return redirect("savings_list")
 
-# --- DASHBOARD API ---
 @login_required
 def dashboard_expenses_by_day_api(request):
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "Authentication required"}, status=401)
+        return JsonResponse({"error": "Требуется авторизация"}, status=401)
 
     # Получаем расходы пользователя
     expenses = Expense.objects.filter(user=request.user)
 
+    # Определяем start_date как начало текущей недели (понедельник)
+    start_date = timezone.now().date() - timedelta(days=timezone.now().weekday())  # Начало недели (понедельник)
+
+    # Создаем словарь с днями недели (7 дней начиная с понедельника)
     day_data = {(start_date + timedelta(days=i)): 0 for i in range(7)}
-    for item in expenses:
-        day_data[item['date']] = float(item['total'])
 
     # Заполняем массив с суммами по дням недели
     for expense in expenses:
         # Используем метод weekday() для получения дня недели (Пн=0, Вт=1, Ср=2 и т.д.)
         day_of_week = expense.date.weekday()  # 0 - Понедельник, 6 - Воскресенье
-        amounts[day_of_week] += float(expense.amount)
+        day_data[start_date + timedelta(days=day_of_week)] += float(expense.amount)
+
+    # Подготавливаем данные для JSON ответа
+    days_of_week = [start_date + timedelta(days=i) for i in range(7)]  # Список дней недели
+    amounts = [day_data[day] for day in days_of_week]
 
     return JsonResponse({
-        "days": days_of_week,
+        "days": [day.strftime('%A') for day in days_of_week],  # Форматируем дни недели как полные названия (например, "Понедельник")
         "amounts": amounts
     })
+
 
 @login_required
 def dashboard_expenses_by_category_pie_api(request):
