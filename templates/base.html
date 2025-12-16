@@ -8,6 +8,9 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <link rel="icon" type="image/png" href="{% static 'afina/images/afina-logo.png' %}">
   <link rel="stylesheet" href="{% static 'Style/General.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -53,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </a>
 
     <!-- NAVIGATION -->
+
     <ul class="nav-links">
       <li><a href="{% url 'home' %}">Главная</a></li>
 
@@ -100,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
-              <button type="submit" class="user-menuitem user-menuitem--danger">
+              <button type="submit" class="user-menu__item--danger">
                 Выход
               </button>
             </form>

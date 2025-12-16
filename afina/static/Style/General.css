@@ -677,9 +677,22 @@ button.btn {
 
 .user-menu__item--danger {
   color: #c93a3a;
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .user-menu__item--danger:hover {
   background: #fff5f5;
   color: #b42828;
 }
+
+
+
