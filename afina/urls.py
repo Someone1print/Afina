@@ -103,5 +103,6 @@ urlpatterns = [
     path('expense_forecast/', views.expense_forecast_view, name='expense_forecast'),
     path('detect_anomalies/', views.detect_anomalies, name='detect_anomalies'),
     path('recommendations/', views.recommendations_view, name='recommendations'),
+    path('all_in_one/', views.all_in_one_view, name='all_in_one'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

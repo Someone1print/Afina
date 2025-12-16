@@ -1258,3 +1258,80 @@ def recommendations_view(request):
     }
 
     return render(request, 'recommendations.html', context)
+
+
+def all_in_one_view(request):
+    user = request.user
+
+    # Извлекаем и обрабатываем данные о доходах
+    income_categories = Income.objects.filter(user=user).values('category__incomeName', 'date', 'amount')
+    income_df = pd.DataFrame(income_categories)
+
+    # Проверка структуры данных
+    income_df['date'] = pd.to_datetime(income_df['date'], errors='coerce')
+    income_df = income_df.dropna(subset=['amount', 'date'])
+    income_df = income_df[income_df['amount'] >= 15000]
+    income_df['amount'] = income_df['amount'].astype(float)
+    income_df['amount'] = np.log1p(income_df['amount'])
+    income_df['month'] = income_df['date'].dt.to_period('M').astype(int)
+
+    # Прогнозирование доходов на следующий месяц
+    X = income_df[['month']]
+    y = income_df['amount']
+    model = LinearRegression()
+    model.fit(X, y)
+    next_month = np.array([[income_df['month'].max() + 1]])
+    forecast_month = model.predict(next_month)
+    forecast_month_value = np.expm1(forecast_month[0])
+
+    # Рекомендации по доходам
+    low_income_categories = income_df[income_df['amount'] < income_df['amount'].quantile(0.25)]
+    income_recommendations = [f"Рекомендуется повысить доходы в категории {category}" for category in low_income_categories['category__incomeName']]
+
+    # Извлекаем и обрабатываем данные о расходах
+    expense_categories = Expense.objects.filter(user=user).values('category__expenseName', 'date', 'amount')
+    expense_df = pd.DataFrame(expense_categories)
+
+    expense_df['date'] = pd.to_datetime(expense_df['date'], errors='coerce')
+    expense_df = expense_df.dropna(subset=['amount', 'date'])
+    expense_df = expense_df[expense_df['amount'] >= 15000]
+    expense_df['amount'] = expense_df['amount'].astype(float)
+    expense_df['amount'] = np.log1p(expense_df['amount'])
+    expense_df['month'] = expense_df['date'].dt.to_period('M').astype(int)
+
+    # Прогнозирование расходов на следующий месяц
+    X_expense = expense_df[['month']]
+    y_expense = expense_df['amount']
+    model_expense = LinearRegression()
+    model_expense.fit(X_expense, y_expense)
+    next_month_expense = np.array([[expense_df['month'].max() + 1]])
+    forecast_month_expense = model_expense.predict(next_month_expense)
+    forecast_month_value_expense = np.expm1(forecast_month_expense[0])
+
+    # Рекомендации по расходам
+    high_expense_categories = expense_df[expense_df['amount'] >= 15000]
+    expense_recommendations = [f"Рекомендуется сократить расходы в категории {category}" for category in high_expense_categories['category__expenseName']]
+
+    # Анализ трендов (для доходов и расходов)
+    trend_recommendations = []
+
+    total_income = float(income_df['amount'].sum())
+    predicted_income = model.predict([[income_df['month'].max() + 1]])
+    if predicted_income[0] < total_income * 0.95:
+        trend_recommendations.append("Прогнозируется снижение доходов в следующем месяце. Рекомендуется рассмотреть увеличение источников дохода.")
+
+    total_expense = float(expense_df['amount'].sum())
+    predicted_expense = model_expense.predict([[expense_df['month'].max() + 1]])
+    if predicted_expense[0] > total_expense * 1.05:
+        trend_recommendations.append("Прогнозируется увеличение расходов в следующем месяце. Рекомендуется пересмотреть большие расходы.")
+
+    # Контекст для передачи в шаблон
+    context = {
+        'forecast_month': forecast_month_value,
+        'forecast_month_expense': forecast_month_value_expense,
+        'income_recommendations': income_recommendations,
+        'expense_recommendations': expense_recommendations,
+        'trend_recommendations': trend_recommendations,
+    }
+
+    return render(request, 'all_in_one.html', context)
