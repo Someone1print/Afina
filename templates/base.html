@@ -5,12 +5,8 @@
   <meta charset="UTF-8" />
   <title>{% block title %}AFINA — ваш финансовый помощник{% endblock %}</title>
 
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <link rel="icon" type="image/png" href="{% static 'afina/images/afina-logo.png' %}">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <link rel="stylesheet" href="{% static 'Style/General.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -56,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </a>
 
     <!-- NAVIGATION -->
-
     <ul class="nav-links">
       <li><a href="{% url 'home' %}">Главная</a></li>
 
@@ -74,6 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- ДОБАВЛЕН ПУНКТ "ПОДПИСКА" -->
       <li><a href="{% url 'stripe_test' %}">Подписка</a></li>
 
+      <!-- ДОБАВЛЕН ПУНКТ "КОПИЛКА" С ПРОВЕРКОЙ ПОДПИСКИ -->
+      <li>
+        {% if has_active_subscription %}
+          <a href="{% url 'savings_list' %}">Копилка</a>
+        {% else %}
+          <a href="{% url 'stripe_test' %}" style="opacity: 0.7;" title="Требуется подписка">
+            Копилка 🔒
+          </a>
+        {% endif %}
+      </li>
+
       {% if user.is_authenticated %}
         <!-- ПУНКТ ПРОФИЛЯ С ВЫПАДАЮЩИМ МЕНЮ -->
         <li class="nav-user">
@@ -88,23 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="{% url 'expense_category_list' %}" class="user-menu__item">Категории расходов</a>
             <a href="{% url 'income_list' %}" class="user-menu__item">Доходы</a>
             <a href="{% url 'expense_list' %}" class="user-menu__item">Расходы</a>
-            <a href="{% url 'stripe_test' %}" class="user-menu__item">Подписка</a>
-
-            <!-- Если подписка активна, показываем Копилку -->
-            {% if has_active_subscription %}
-                <a href="{% url 'savings_list' %}" class="user-menu__item">
-                Копилка
-            </a>
-            {% else %}
-                <a href="{% url 'stripe_test' %}" class="user-menu__item">
-                    Копилка (требуется подписка)
-                </a>
-            {% endif %}
-
+            <!-- УБРАНО: Подписка и Копилка из выпадающего списка -->
 
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
-              <button type="submit" class="user-menu__item--danger">
+              <button type="submit" class="user-menuitem user-menuitem--danger">
                 Выход
               </button>
             </form>
@@ -133,10 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="site-footer">
   <div class="footer-container">
-    <p>© AFINA. Все права защищены.</p>
+    <p>©️ AFINA. Все права защищены.</p>
     <ul>
       <li><a href="{% url 'home' %}">Главная</a></li>
-      <li><a href="{% url 'income_category_list' %}">Категории</a></li>
+        <li><a href="{% url 'income_category_list' %}">Категории</a></li>
       <li><a href="{% url 'profile_view' %}">Профиль</a></li>
       <!-- ДОБАВЛЕНО В ФУТЕР -->
       <li><a href="{% url 'stripe_test' %}">Подписка</a></li>
