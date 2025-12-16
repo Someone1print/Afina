@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {% if has_active_subscription %}
           <a href="{% url 'savings_list' %}">Копилка</a>
           <a href="{% url 'all_in_one' %}">AI</a>
+
         {% else %}
           <a href="{% url 'stripe_test' %}" style="opacity: 0.7;" title="Требуется подписка">
             Копилка 🔒
