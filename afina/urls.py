@@ -96,5 +96,11 @@ urlpatterns = [
     path('subscription/cancel/', views.cancel_subscription_view, name='cancel_subscription'),
     path('subscription/cancel/confirm/', views.cancel_subscription_confirm, name='cancel_subscription_confirm'),
     #path('stripe/webhook/', webhooks.stripe_webhook, name='stripe_webhook'),
+
+    #Анализ данных
+    path('data_for_analysis/', views.data_for_analysis, name='data_for_analysis'),
+    path('income_forecast/', views.income_forecast_view, name='income_forecast'),
+    path('expense_forecast/', views.expense_forecast_view, name='expense_forecast'),
+    path('detect_anomalies/', views.detect_anomalies, name='detect_anomalies'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -20,6 +20,13 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from datetime import datetime
+import pandas as pd
+from prophet import Prophet
+from sklearn.ensemble import IsolationForest
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+
 
 # Регистрация
 def register_view(request):
@@ -998,5 +1005,175 @@ def add_amount_to_savings(request, pk):
         "goal": goal
     })
 
+@login_required
+def data_for_analysis(request):
+    user = request.user
+
+    # Извлечение данных о доходах
+    incomes = Income.objects.filter(user=user).values('date', 'amount', 'category__incomeName')
+    expenses = Expense.objects.filter(user=user).values('date', 'amount', 'category__expenseName')
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(incomes)
+    expense_df = pd.DataFrame(expenses)
+
+    # Преобразуем столбец 'date' в формат datetime
+    income_df['date'] = pd.to_datetime(income_df['date'])
+    expense_df['date'] = pd.to_datetime(expense_df['date'])
+
+    # Передаем данные в шаблон
+    context = {
+        'income_data': income_df.to_dict(orient='records'),  # Преобразуем в формат для шаблона
+        'expense_data': expense_df.to_dict(orient='records'),
+    }
+    return render(request, 'data_for_analysis.html', context)
+
+@login_required
+def income_forecast_view(request):
+    user = request.user
+
+    # Извлекаем данные о доходах
+    incomes = Income.objects.filter(user=user).values('date', 'amount')
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(incomes)
+
+    # Преобразуем столбец 'date' в формат datetime
+    income_df['date'] = pd.to_datetime(income_df['date'], errors='coerce')
+
+    # Убираем строки с пустыми значениями
+    income_df = income_df.dropna(subset=['amount', 'date'])
+
+    # Фильтруем выбросы (доходы больше 15000)
+    income_df = income_df[income_df['amount'] >= 19000]
+
+    # Проверяем на наличие NaN значений
+    if income_df.isnull().values.any():
+        print("В данных есть NaN значения!")
+        return render(request, 'error.html', {'message': 'В данных есть пустые значения. Пожалуйста, проверьте данные.'})
+
+    # Проверяем, что данных достаточно для обучения модели
+    if len(income_df) < 2:
+        return render(request, 'error.html', {'message': 'Недостаточно данных для прогнозирования. Требуется минимум 2 записи.'})
+
+    # Логарифмируем данные, чтобы уменьшить влияние больших выбросов
+    income_df['amount'] = income_df['amount'].astype(float)  # Преобразуем в float
+    income_df['amount'] = np.log1p(income_df['amount'])  # log1p для того, чтобы обрабатывать 0 или маленькие значения
+
+    # Преобразуем столбец даты в числовой формат (месяц в числовое значение)
+    income_df['month'] = income_df['date'].dt.to_period('M').astype(int)  # Преобразуем период в числовое значение
+
+    # Независимая переменная (месяц)
+    X = income_df[['month']]
+    # Зависимая переменная (сумма доходов)
+    y = income_df['amount']
+
+    # Инициализация и обучение модели линейной регрессии
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Прогнозируем на следующий месяц (30 дней)
+    next_month = np.array([[income_df['month'].max() + 1]])  # Прогнозируем через 1 месяц
+    forecast_month = model.predict(next_month)
+
+    # Декодируем логарифмированные данные обратно в обычные значения
+    forecast_month_value = np.expm1(forecast_month[0])  # Возвращаем значение после логарифма
+
+    # Создаем контекст с прогнозами
+    context = {
+        'forecast_month': forecast_month_value,
+    }
+
+    return render(request, 'income_forecast.html', context)
 
 
+@login_required
+def expense_forecast_view(request):
+    user = request.user
+
+    # Извлекаем данные о расходах
+    expenses = Expense.objects.filter(user=user).values('date', 'amount')
+
+    # Преобразуем в pandas DataFrame
+    expense_df = pd.DataFrame(expenses)
+
+    # Преобразуем столбец 'date' в формат datetime
+    expense_df['date'] = pd.to_datetime(expense_df['date'], errors='coerce')
+
+    # Убираем строки с пустыми значениями
+    expense_df = expense_df.dropna(subset=['amount', 'date'])
+
+    # Фильтруем выбросы (расходы больше 15000)
+    expense_df = expense_df[expense_df['amount'] >= 1000]
+
+    # Проверяем на наличие NaN значений
+    if expense_df.isnull().values.any():
+        print("В данных есть NaN значения!")
+        return render(request, 'error.html', {'message': 'В данных есть пустые значения. Пожалуйста, проверьте данные.'})
+
+    # Проверяем, что данных достаточно для обучения модели
+    if len(expense_df) < 2:
+        return render(request, 'error.html', {'message': 'Недостаточно данных для прогнозирования. Требуется минимум 2 записи.'})
+
+    # Логарифмируем данные, чтобы уменьшить влияние больших выбросов
+    expense_df['amount'] = expense_df['amount'].astype(float)  # Преобразуем в float
+    expense_df['amount'] = np.log1p(expense_df['amount'])  # log1p для того, чтобы обрабатывать 0 или маленькие значения
+
+    # Преобразуем столбец даты в числовой формат (месяц в числовое значение)
+    expense_df['month'] = expense_df['date'].dt.to_period('M').astype(int)  # Преобразуем период в числовое значение
+
+    # Независимая переменная (месяц)
+    X = expense_df[['month']]
+    # Зависимая переменная (сумма расходов)
+    y = expense_df['amount']
+
+    # Инициализация и обучение модели линейной регрессии
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Прогнозируем на следующий месяц (30 дней)
+    next_month = np.array([[expense_df['month'].max() + 1]])  # Прогнозируем через 1 месяц
+    forecast_month = model.predict(next_month)
+
+    # Декодируем логарифмированные данные обратно в обычные значения
+    forecast_month_value = np.expm1(forecast_month[0])  # Возвращаем значение после логарифма
+
+    # Создаем контекст с прогнозами
+    context = {
+        'forecast_month': forecast_month_value,
+    }
+
+    return render(request, 'expense_forecast.html', context)
+
+
+
+@login_required
+def detect_anomalies(request):
+    user = request.user
+
+    # Извлечение данных о доходах и расходах
+    incomes = Income.objects.filter(user=user).values('amount', 'category__incomeName')
+    expenses = Expense.objects.filter(user=user).values('amount', 'category__expenseName')
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(incomes)
+    expense_df = pd.DataFrame(expenses)
+
+    # Детекция аномалий в доходах
+    iforest = IsolationForest(contamination=0.05)  # 5% аномальных данных
+    income_df['anomaly'] = iforest.fit_predict(income_df[['amount']])
+
+    # Детекция аномалий в расходах
+    expense_df['anomaly'] = iforest.fit_predict(expense_df[['amount']])
+
+    # Фильтрация аномальных транзакций
+    anomalies_income = income_df[income_df['anomaly'] == -1]
+    anomalies_expense = expense_df[expense_df['anomaly'] == -1]
+
+    # Передаем в шаблон
+    context = {
+        'anomalies_income': anomalies_income,
+        'anomalies_expense': anomalies_expense,
+    }
+
+    return render(request, 'anomalies_detected.html', context)
