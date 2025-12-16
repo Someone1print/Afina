@@ -84,19 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="{% url 'expense_category_list' %}" class="user-menu__item">Категории расходов</a>
             <a href="{% url 'income_list' %}" class="user-menu__item">Доходы</a>
             <a href="{% url 'expense_list' %}" class="user-menu__item">Расходы</a>
-            <a href="{% url 'stripe_test' %}" class="user-menu__item">Подписка</a>
 
-            <!-- Если подписка активна, показываем Копилку -->
-            {% if has_active_subscription %}
-                <a href="{% url 'savings_list' %}" class="user-menu__item">
-                Копилка
-            </a>
-            {% else %}
-                <a href="{% url 'stripe_test' %}" class="user-menu__item">
-                    Копилка (требуется подписка)
-                </a>
-            {% endif %}
-
+               <!-- УБРАНО: Подписка и Копилка из выпадающего списка -->
 
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
