@@ -1177,3 +1177,84 @@ def detect_anomalies(request):
     }
 
     return render(request, 'anomalies_detected.html', context)
+
+@login_required
+def recommendations_view(request):
+    user = request.user
+
+    # Анализ доходов
+    income_categories = Income.objects.filter(user=user) \
+        .values('category__incomeName', 'date', 'amount')  # Добавляем 'date' в извлекаемые данные
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(income_categories)
+
+    # Проверим структуру данных
+    print(income_df.head())  # Для диагностики структуры
+
+    # Преобразуем столбец 'date' в формат datetime
+    income_df['date'] = pd.to_datetime(income_df['date'], errors='coerce')
+
+    # Убираем строки с пустыми значениями
+    income_df = income_df.dropna(subset=['amount', 'date'])
+
+    # Фильтруем выбросы (доходы больше 15000)
+    income_df = income_df[income_df['amount'] >= 15000]
+
+    # Проверяем на наличие NaN значений
+    if income_df.isnull().values.any():
+        print("В данных есть NaN значения!")
+        return render(request, 'error.html', {'message': 'В данных есть пустые значения. Пожалуйста, проверьте данные.'})
+
+    # Проверяем, что данных достаточно для обучения модели
+    if len(income_df) < 2:
+        return render(request, 'error.html', {'message': 'Недостаточно данных для прогнозирования. Требуется минимум 2 записи.'})
+
+    # Логарифмируем данные, чтобы уменьшить влияние больших выбросов
+    income_df['amount'] = income_df['amount'].astype(float)  # Преобразуем в float
+    income_df['amount'] = np.log1p(income_df['amount'])  # log1p для того, чтобы обрабатывать 0 или маленькие значения
+
+    # Преобразуем столбец даты в числовой формат (месяц в числовое значение)
+    income_df['month'] = income_df['date'].dt.to_period('M').astype(int)  # Преобразуем период в числовое значение
+
+    # Независимая переменная (месяц)
+    X = income_df[['month']]
+    # Зависимая переменная (сумма доходов)
+    y = income_df['amount']
+
+    # Инициализация и обучение модели линейной регрессии
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Прогнозируем на следующий месяц (30 дней)
+    next_month = np.array([[income_df['month'].max() + 1]])  # Прогнозируем через 1 месяц
+    forecast_month = model.predict(next_month)
+
+    # Декодируем логарифмированные данные обратно в обычные значения
+    forecast_month_value = np.expm1(forecast_month[0])  # Возвращаем значение после логарифма
+
+    # Создаем рекомендации
+    expense_categories = Expense.objects.filter(user=user) \
+        .values('category__expenseName', 'amount')  # Добавляем поле для расходов
+
+    expense_df = pd.DataFrame(expense_categories)
+    expense_df['amount'] = expense_df['amount'].astype(float)  # Преобразуем в float
+    high_expense_categories = expense_df[expense_df['amount'] >= 15000]
+
+    expense_recommendations = []
+    for category in high_expense_categories['category__expenseName']:
+        expense_recommendations.append(f"Рекомендуется сократить расходы в категории {category}.")
+
+    # Даем рекомендации по доходам
+    low_income_categories = income_df[income_df['amount'] < income_df['amount'].quantile(0.25)]
+    income_recommendations = []
+    for category in low_income_categories['category__incomeName']:
+        income_recommendations.append(f"Рекомендуется повысить доходы в категории {category}.")
+
+    context = {
+        'forecast_month': forecast_month_value,
+        'expense_recommendations': expense_recommendations,
+        'income_recommendations': income_recommendations,
+    }
+
+    return render(request, 'recommendations.html', context)
