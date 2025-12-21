@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Данные для анализа</title>
+</head>
+<body>
+    <h1>Данные о доходах</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in income_data %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.category__incomeName }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Данные о расходах</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in expense_data %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.category__expenseName }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -46,16 +46,20 @@ def reassign_incomes_on_category_delete(sender, instance: IncomeCategory, using,
 # Новый сигнал для создания клиента в Stripe при регистрации пользователя
 @receiver(post_save, sender=User)
 def create_profile_and_stripe_customer(sender, instance, created, **kwargs):
-    if created:  # Этот сигнал сработает только при создании нового пользователя
-        # Создаем профиль
-        profile = Profile.objects.create(user=instance)
 
-        # Создаем клиента в Stripe
-        customer = stripe.Customer.create(
-            email=instance.email,
-            name=instance.username,
-        )
+    if created:  # Этот сигнал срабатывает только при создании нового пользователя
+        # Проверяем, существует ли уже клиент с таким email
+        existing_customer = stripe.Customer.list(email=instance.email).data
+        if existing_customer:
+            customer = existing_customer[0]  # Если клиент существует, используем его
+        else:
+            # Если клиента нет, создаем нового
+            customer = stripe.Customer.create(
+                email=instance.email,
+                name=instance.username,
+            )
 
-        # Сохраняем ID клиента Stripe в профиль пользователя
+        # Создаем или обновляем профиль пользователя
+        profile, _ = Profile.objects.get_or_create(user=instance)
         profile.stripe_customer_id = customer.id
         profile.save()

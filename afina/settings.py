@@ -109,6 +109,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -158,6 +161,7 @@ SPECTACULAR_SETTINGS = {
 ***REMOVED***
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', 'pk_test_51SXGylHDyrxMN0Jp6uWRtENXFElU8hdTjs146Wp752MChsWIxCoCYFGEHBAshvf8rjE1dGPHLcBWjFXBxmmo0N4A00nWRZLHtR')
 STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_1SXHX8HDyrxMN0JpIklIongA')
+#STRIPE_WEBHOOK_SECRET = 'whsec_xxx'  # Получите из панели Stripe
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.dev',  # wildcard for any ngrok subdomain

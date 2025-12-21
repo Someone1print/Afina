@@ -17,6 +17,8 @@ Including another URLconf
 
 # from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -67,6 +69,7 @@ urlpatterns = [
     path('expenses/by-category/', views.expense_by_category_api, name='expense_by_category_api'),
     path('expenses/by-month/', views.expense_by_month_api, name='expense_by_month_api'),
 
+
     # Profile
     path('profile/', views.profile_view, name='profile_view'),
     path('profile/edit/', views.profile_edit, name='profile_edit'),
@@ -87,5 +90,19 @@ urlpatterns = [
     path("savings/new/", views.savings_create, name="savings_create"),
     path("savings/<int:pk>/edit/", views.savings_update, name="savings_update"),
     path("savings/<int:pk>/delete/", views.savings_delete, name="savings_delete"),
-]
+    path('savings/<int:pk>/add/', views.add_amount_to_savings, name='add_amount_to_savings'),
+
+# Подписка
+    path('subscription/cancel/', views.cancel_subscription_view, name='cancel_subscription'),
+    path('subscription/cancel/confirm/', views.cancel_subscription_confirm, name='cancel_subscription_confirm'),
+    #path('stripe/webhook/', webhooks.stripe_webhook, name='stripe_webhook'),
+
+    #Анализ данных
+    path('data_for_analysis/', views.data_for_analysis, name='data_for_analysis'),
+    path('income_forecast/', views.income_forecast_view, name='income_forecast'),
+    path('expense_forecast/', views.expense_forecast_view, name='expense_forecast'),
+    path('detect_anomalies/', views.detect_anomalies, name='detect_anomalies'),
+    path('recommendations/', views.recommendations_view, name='recommendations'),
+    path('all_in_one/', views.all_in_one_view, name='all_in_one'),
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

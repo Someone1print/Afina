@@ -56,6 +56,11 @@
                     {% csrf_token %}
                     <button type="submit" class="danger-link">Удалить</button>
                   </form>
+                  <!-- Новый пункт "Добавить сумму" -->
+                  <a href="{% url 'add_amount_to_savings' g.id %}" class="row-menu__item">
+                    <span class="row-menu__icon">💰</span>
+                    <span class="row-menu__text">Добавить сумму</span>
+                  </a>
                 </div>
               </div>
             </td>
@@ -76,63 +81,67 @@
   </div>
 
   <!-- УЖЕ НАКОПЛЕНО -->
- {% if completed_goals %}
-<div class="savings-card completed-card">
-  <div class="savings-card__header">
-    <h2>Уже накоплено</h2>
+  {% if completed_goals %}
+  <div class="savings-card completed-card">
+    <div class="savings-card__header">
+      <h2>Уже накоплено</h2>
+    </div>
+
+    <div class="savings-card__body">
+      <table class="savings-table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Цель</th>
+            <th>Сумма</th>
+            <th>Накоплено</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for g in completed_goals %}
+          <tr>
+            <td>{{ g.created_at|date:"M. d, Y" }}</td>
+            <td>{{ g.title }}</td>
+            <td>{{ g.target_amount }} KGS</td>
+
+            <td>
+              <div class="progress-cell">
+                <div class="progress-cell__top">
+                  <span class="progress-cell__amount">{{ g.current_amount }} KGS</span>
+                  <span class="progress-cell__percent">{{ g.progress_percent }}%</span>
+                </div>
+                <div class="progress-bar" data-progress="{{ g.progress_percent }}">
+                  <div class="progress-bar__fill"></div>
+                </div>
+              </div>
+            </td>
+
+            <td class="actions-cell">
+              <div class="actions-wrapper">
+                <button type="button" class="dot-btn"
+                        onclick="toggleMenu('menu-completed-{{ g.id }}')">⋮</button>
+                <div class="actions-menu" id="menu-completed-{{ g.id }}">
+                  <a href="{% url 'savings_update' g.id %}">Изменить</a>
+                  <form action="{% url 'savings_delete' g.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="danger-link">Удалить</button>
+                  </form>
+                  <!-- Новый пункт "Добавить сумму" -->
+                  <a href="{% url 'add_amount_to_savings' g.id %}" class="row-menu__item">
+                    <span class="row-menu__icon">💰</span>
+                    <span class="row-menu__text">Добавить сумму</span>
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-
-  <div class="savings-card__body">
-    <table class="savings-table">
-      <thead>
-        <tr>
-          <th>Дата</th>
-          <th>Цель</th>
-          <th>Сумма</th>
-          <th>Накоплено</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for g in completed_goals %}
-        <tr>
-          <td>{{ g.created_at|date:"M. d, Y" }}</td>
-          <td>{{ g.title }}</td>
-          <td>{{ g.target_amount }} KGS</td>
-
-          <td>
-            <div class="progress-cell">
-              <div class="progress-cell__top">
-                <span class="progress-cell__amount">{{ g.current_amount }} KGS</span>
-                <span class="progress-cell__percent">{{ g.progress_percent }}%</span>
-              </div>
-              <div class="progress-bar" data-progress="{{ g.progress_percent }}">
-                <div class="progress-bar__fill"></div>
-              </div>
-            </div>
-          </td>
-
-          <td class="actions-cell">
-            <div class="actions-wrapper">
-              <button type="button" class="dot-btn"
-                      onclick="toggleMenu('menu-completed-{{ g.id }}')">⋮</button>
-              <div class="actions-menu" id="menu-completed-{{ g.id }}">
-                <a href="{% url 'savings_update' g.id %}">Изменить</a>
-                <form action="{% url 'savings_delete' g.id %}" method="POST">
-                  {% csrf_token %}
-                  <button type="submit" class="danger-link">Удалить</button>
-                </form>
-              </div>
-            </div>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-{% endif %}
-
+  {% endif %}
 
 </div>
 

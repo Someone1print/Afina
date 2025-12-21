@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рекомендации по расходам и доходам</title>
+</head>
+<body>
+    <h1>Рекомендации по доходам и расходам</h1>
+
+    <h2>Рекомендации по расходам</h2>
+    {% if expense_recommendations %}
+        <ul>
+            {% for recommendation in expense_recommendations %}
+                <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет рекомендаций по сокращению расходов.</p>
+    {% endif %}
+
+    <h2>Рекомендации по доходам</h2>
+    {% if income_recommendations %}
+        <ul>
+            {% for recommendation in income_recommendations %}
+                <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет рекомендаций по увеличению доходов.</p>
+    {% endif %}
+
+    <h2>Рекомендации по тренду</h2>
+    {% if trend_recommendations %}
+        <ul>
+            {% for recommendation in trend_recommendations %}
+                <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет особых рекомендаций по тренду.</p>
+    {% endif %}
+</body>
+</html>

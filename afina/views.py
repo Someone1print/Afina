@@ -1,10 +1,9 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegisterForm
-from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal
-from .forms import (IncomeCategoryForm, ExpenseCategoryForm,IncomeForm, ExpenseForm, ProfileForm, SavingGoalForm)
+from .forms import RegisterForm, SavingGoalForm, ProfileForm, AddAmountForm
+from .models import IncomeCategory, ExpenseCategory, Income, Expense, Profile, SavingGoal, UserSubscription
+from .forms import (IncomeCategoryForm, ExpenseCategoryForm, IncomeForm, ExpenseForm, ProfileForm, SavingGoalForm)
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum, F
 from django.contrib import messages
@@ -13,22 +12,34 @@ from django.core.paginator import Paginator
 from django.db.models.functions import TruncMonth
 from django.utils.dateparse import parse_date
 import stripe
+from django.db.models.functions import ExtractWeekDay
+from django.db.models import Sum
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
+from datetime import datetime
+import pandas as pd
+from prophet import Prophet
+from sklearn.ensemble import IsolationForest
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+
 
 # Регистрация
-# metodi bystroy razrabotki
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # автоматически залогинивает
-            return redirect('home')  # куда хочешь после регистрации
+            login(request, user)
+            return redirect('home')
     else:
         form = RegisterForm()
     return render(request, 'register.html', {'form': form})
+
 
 # Логин
 def login_view(request):
@@ -37,21 +48,33 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            print("Successfully logged in")
             return redirect('home')
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
+
 # Логаут
 @login_required
 def logout_view(request):
     logout(request)
-    print("Вы вышли из системы")
     return redirect('login')
 
+
 def home_view(request):
-    return render(request, 'home.html')
+    user = request.user
+    # Проверяем, есть ли у пользователя активная подписка
+    try:
+        subscription = UserSubscription.objects.get(user=user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
+
+    # Рендерим главную страницу с информацией о подписке
+    return render(request, 'home.html', {
+        'has_active_subscription': has_active_subscription,
+    })
+
 
 # -------------------------
 # IncomeCategory CRUD views
@@ -59,17 +82,18 @@ def home_view(request):
 @login_required
 def income_category_list(request):
     qs = income_categories_for_user(request.user)
-    paginator = Paginator(qs, 6)               # по 8 записей на страницу
+    paginator = Paginator(qs, 6)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number) # безопасно: сам обрабатывает мусорные значения
+    page_obj = paginator.get_page(page_number)
 
     ctx = {
-        'categories': page_obj.object_list,    # чтобы твой шаблон продолжал работать
+        'categories': page_obj.object_list,
         'page_obj': page_obj,
         'paginator': paginator,
         'is_paginated': page_obj.has_other_pages(),
     }
     return render(request, 'income_category_list.html', ctx)
+
 
 @login_required
 def income_category_create(request):
@@ -122,8 +146,6 @@ def income_category_delete(request, pk):
     return render(request, 'income_category_confirm_delete.html', {'category': category})
 
 
-
-
 # -------- ExpenseCategory CRUD --------
 @login_required
 def expense_category_list(request):
@@ -139,6 +161,8 @@ def expense_category_list(request):
         'is_paginated': page_obj.has_other_pages(),
     }
     return render(request, 'expense_category_list.html', ctx)
+
+
 @login_required
 def expense_category_create(request):
     if request.method == 'POST':
@@ -153,6 +177,7 @@ def expense_category_create(request):
     else:
         form = ExpenseCategoryForm()
     return render(request, 'expense_category_form.html', {'form': form, 'title': 'Добавить категорию расходов'})
+
 
 @login_required
 def expense_category_update(request, pk):
@@ -171,11 +196,11 @@ def expense_category_update(request, pk):
         form = ExpenseCategoryForm(instance=category)
     return render(request, 'expense_category_form.html', {'form': form, 'title': 'Изменить категорию расходов'})
 
+
 @login_required
 def expense_category_delete(request, pk):
     category = get_object_or_404(ExpenseCategory, pk=pk)
 
-    # Проверяем: если дефолтная или не твоя — просто показываем всплывающее сообщение и возвращаемся
     if category.owner != request.user or (category.is_default and category.expenseName.lower() == 'другое'):
         messages.error(request, "❌ Нельзя удалить общие или дефолтные категории.")
         return redirect('expense_category_list')
@@ -187,7 +212,6 @@ def expense_category_delete(request, pk):
         return redirect('expense_category_list')
 
     return render(request, 'expense_category_confirm_delete.html', {'category': category})
-
 
 
 # -------- Income CRUD --------
@@ -206,6 +230,8 @@ def income_list(request):
         'page_obj': page_obj,
     }
     return render(request, 'income_list.html', context)
+
+
 @login_required
 def income_create(request):
     if request.method == 'POST':
@@ -219,6 +245,7 @@ def income_create(request):
         form = IncomeForm(user=request.user)
     return render(request, 'income_form.html', {'form': form, 'title': 'Добавить доход'})
 
+
 @login_required
 def income_update(request, pk):
     item = get_object_or_404(Income, pk=pk, user=request.user)
@@ -231,6 +258,7 @@ def income_update(request, pk):
         form = IncomeForm(instance=item, user=request.user)
     return render(request, 'income_form.html', {'form': form, 'title': 'Изменить доход'})
 
+
 @login_required
 def income_delete(request, pk):
     item = get_object_or_404(Income, pk=pk, user=request.user)
@@ -238,6 +266,7 @@ def income_delete(request, pk):
         item.delete()
         return redirect('income_list')
     return render(request, 'income_confirm_delete.html', {'item': item})
+
 
 # -------- Expense CRUD --------
 @login_required
@@ -255,6 +284,8 @@ def expense_list(request):
         'page_obj': page_obj,
     }
     return render(request, 'expense_list.html', context)
+
+
 @login_required
 def expense_create(request):
     if request.method == 'POST':
@@ -268,6 +299,7 @@ def expense_create(request):
         form = ExpenseForm(user=request.user)
     return render(request, 'expense_form.html', {'form': form, 'title': 'Добавить расход'})
 
+
 @login_required
 def expense_update(request, pk):
     item = get_object_or_404(Expense, pk=pk, user=request.user)
@@ -279,6 +311,7 @@ def expense_update(request, pk):
     else:
         form = ExpenseForm(instance=item, user=request.user)
     return render(request, 'expense_form.html', {'form': form, 'title': 'Изменить расход'})
+
 
 @login_required
 def expense_delete(request, pk):
@@ -292,9 +325,96 @@ def expense_delete(request, pk):
 @login_required
 def profile_view(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    # Получаем подписку пользователя
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        subscription = None
+        has_active_subscription = False
+
     return render(request, 'profile_view.html', {
         'profile': profile,
+        'has_active_subscription': has_active_subscription,
+        'subscription': subscription,
     })
+
+
+@login_required
+def cancel_subscription_view(request):
+    """Страница подтверждения отмены подписки"""
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+
+        if not subscription.is_active:
+            messages.warning(request, "У вас нет активной подписки.")
+            return redirect('profile_view')
+    except UserSubscription.DoesNotExist:
+        messages.warning(request, "У вас нет активной подписки.")
+        return redirect('profile_view')
+
+    context = {
+        'subscription': subscription,
+        'has_active_subscription': True,
+    }
+    return render(request, 'subscription_cancel_confirm.html', context)
+
+
+@login_required
+def cancel_subscription_confirm(request):
+    """Подтверждение отмены подписки"""
+    if request.method != 'POST':
+        return redirect('profile_view')
+
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+
+        if not subscription.is_active:
+            messages.warning(request, "У вас нет активной подписки.")
+            return redirect('profile_view')
+    except UserSubscription.DoesNotExist:
+        messages.warning(request, "У вас нет активной подписки.")
+        return redirect('profile_view')
+
+    try:
+        # Инициализируем Stripe
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+
+        # Если есть stripe_subscription_id, отменяем в Stripe
+        if subscription.stripe_subscription_id:
+            stripe.Subscription.modify(
+                subscription.stripe_subscription_id,
+                cancel_at_period_end=True
+            )
+
+            # Обновляем статус в базе данных
+            subscription.cancel_at_period_end = True
+            subscription.status = 'active'
+            subscription.save()
+
+            messages.success(
+                request,
+                f"✅ Подписка будет отменена {subscription.current_period_end.strftime('%d.%m.%Y')}. "
+                f"Вы сохраните доступ до этой даты."
+            )
+        else:
+            # Если нет Stripe ID, просто помечаем как отмененную
+            subscription.cancel_at_period_end = True
+            subscription.status = 'canceled'
+            subscription.save()
+            messages.success(request, "✅ Подписка отменена.")
+
+    except stripe.error.StripeError as e:
+        messages.error(request, f"❌ Ошибка Stripe: {str(e)}")
+    except Exception as e:
+        messages.error(request, f"❌ Произошла ошибка: {str(e)}")
+
+    return redirect('profile_view')
+
+
+
+
 
 
 @login_required
@@ -302,16 +422,16 @@ def profile_edit(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)  # Обработка файлов
 
         if form.is_valid():
-            # сначала обновляем User
+            # Сохраняем данные пользователя
             user = request.user
             user.username = form.cleaned_data["username"]
             user.email = form.cleaned_data["email"]
             user.save()
 
-            # потом профиль
+            # Сохраняем изменения профиля (включая фото)
             form.save()
 
             messages.success(request, "✅ Профиль успешно обновлён.")
@@ -329,18 +449,21 @@ def profile_edit(request):
 
     return render(request, 'profile_form.html', {
         'form': form,
-        'title': 'Профиль',
+        'title': 'Редактирование профиля',
     })
+
+
 
 
 def expense_categories_for_user(user):
     return ExpenseCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'expenseName')
 
+
 def income_categories_for_user(user):
     return IncomeCategory.objects.filter(Q(owner=user) | Q(owner__isnull=True)).order_by('-is_default', 'incomeName')
 
-#Создание графиков для доходов
 
+# Создание графиков для доходов
 @login_required
 def expense_by_category_api(request):
     qs = Expense.objects.filter(user=request.user)
@@ -359,6 +482,7 @@ def expense_by_category_api(request):
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
 
+
 @login_required
 def expense_by_month_api(request):
     qs = Expense.objects.filter(user=request.user)
@@ -374,12 +498,12 @@ def expense_by_month_api(request):
              .annotate(total=Sum('amount'))
              .order_by('m'))
 
-    labels = [row['m'].strftime('%b %Y') for row in agg]  # например: "Ноя 2025"
+    labels = [row['m'].strftime('%b %Y') for row in agg]
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
 
-#Создание графиков для расходов
 
+# Создание графиков для расходов
 @login_required
 def income_by_category_api(request):
     qs = Income.objects.filter(user=request.user)
@@ -397,6 +521,7 @@ def income_by_category_api(request):
     labels = [row['category__incomeName'] for row in agg]
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
+
 
 @login_required
 def income_by_month_api(request):
@@ -417,68 +542,176 @@ def income_by_month_api(request):
     values = [float(row['total'] or 0) for row in agg]
     return JsonResponse({"labels": labels, "values": values})
 
+
 @login_required
 def stripe_test_view(request):
     context = {
-        "stripe_public_key": settings.STRIPE_PUBLISHABLE_KEY,  # <-- имя такое
+        "stripe_public_key": settings.STRIPE_PUBLISHABLE_KEY,
     }
     return render(request, "stripe_test.html", context)
-
 
 
 @csrf_exempt
 @login_required
 def create_checkout_session(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid method"}, status=400)
+    email = request.user.email
 
-    stripe.api_key = settings.STRIPE_SECRET_KEY
+    # Проверяем, существует ли клиент в Stripe
+    existing_customers = stripe.Customer.list(email=email, limit=1).data
+
+    if existing_customers:
+        customer_id = existing_customers[0].id
+    else:
+        # Создаем нового клиента
+        customer = stripe.Customer.create(
+            email=email,
+            name=request.user.username,
+            metadata={
+                'user_id': str(request.user.id),
+                'username': request.user.username
+            }
+        )
+        customer_id = customer.id
+
+        # Сохраняем customer_id в профиль пользователя
+        profile, created = Profile.objects.get_or_create(user=request.user)
+        profile.stripe_customer_id = customer_id
+        profile.save()
 
     try:
         checkout_session = stripe.checkout.Session.create(
+            customer=customer_id,
+            customer_update={
+                'address': 'auto',
+                'name': 'auto'
+            },
             mode="subscription",
-            line_items=[
-                {
-                    "price": settings.STRIPE_PRICE_ID,  # price_xxx из Stripe
-                    "quantity": 1,
-                }
-            ],
+            line_items=[{
+                "price": settings.STRIPE_PRICE_ID,
+                "quantity": 1,
+            }],
+            metadata={
+                'user_id': str(request.user.id),
+                'username': request.user.username
+            },
             success_url=request.build_absolute_uri(
                 reverse("stripe_success")
             ) + "?session_id={CHECKOUT_SESSION_ID}",
             cancel_url=request.build_absolute_uri(reverse("stripe_cancel")),
         )
+
         return JsonResponse({"id": checkout_session.id})
-    except Exception as e:
-        # Чтобы было видно точную ошибку
-        return JsonResponse({"error": str(e)}, status=500)
+
+    except stripe.error.StripeError as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 @login_required
 def stripe_success_view(request):
-    return render(request, "stripe_success.html")
+    session_id = request.GET.get('session_id')
+
+    # Проверяем текущую подписку пользователя
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        subscription = None
+        has_active_subscription = False
+
+    if session_id:
+        try:
+            # Получаем информацию о сессии из Stripe
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            session = stripe.checkout.Session.retrieve(session_id)
+
+            if session.mode == 'subscription' and session.payment_status == 'paid':
+                # Получаем подписку из Stripe
+                subscription_info = stripe.Subscription.retrieve(session.subscription)
+
+                # Сохраняем customer_id в профиль
+                profile, _ = Profile.objects.get_or_create(user=request.user)
+                if session.customer:
+                    profile.stripe_customer_id = session.customer
+                    profile.save()
+
+                # Определяем даты (30 дней от текущей даты)
+                from datetime import datetime, timedelta
+                now = datetime.now()
+                period_end = now + timedelta(days=30)
+
+                # Получаем price_id безопасно
+                stripe_price_id = None
+                if hasattr(subscription_info, 'items') and subscription_info.items:
+                    # Если items это список
+                    if isinstance(subscription_info.items, list) and len(subscription_info.items) > 0:
+                        stripe_price_id = subscription_info.items[0].price.id
+                    # Если items это объект с data
+                    elif hasattr(subscription_info.items, 'data') and subscription_info.items.data:
+                        stripe_price_id = subscription_info.items.data[0].price.id
+
+                # Создаем или обновляем подписку пользователя
+                user_subscription, created = UserSubscription.objects.update_or_create(
+                    user=request.user,
+                    defaults={
+                        'stripe_subscription_id': subscription_info.id,
+                        'stripe_price_id': stripe_price_id,
+                        'status': 'active',
+                        'current_period_start': now,
+                        'current_period_end': period_end,
+                        'cancel_at_period_end': False,
+                    }
+                )
+
+                messages.success(request, "✅ Подписка успешно активирована на 30 дней!")
+                has_active_subscription = True
+                subscription = user_subscription  # Обновляем переменную subscription
+
+        except stripe.error.StripeError as e:
+            messages.error(request, f"❌ Ошибка Stripe: {str(e)}")
+        except Exception as e:
+            messages.error(request, f"❌ Произошла ошибка: {str(e)}")
+
+    return render(request, "stripe_success.html", {
+        'has_active_subscription': has_active_subscription,
+        'subscription': subscription,
+    })
 
 
 @login_required
 def stripe_cancel_view(request):
     return render(request, "stripe_cancel.html")
 
+
 @login_required
 def savings_list(request):
-    qs = SavingGoal.objects.filter(user=request.user)
+    # Проверяем подписку напрямую
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
 
+    qs = SavingGoal.objects.filter(user=request.user)
     active_goals = qs.filter(current_amount__lt=F("target_amount"))
     completed_goals = qs.filter(current_amount__gte=F("target_amount"))
 
     context = {
         "active_goals": active_goals,
         "completed_goals": completed_goals,
+        "has_active_subscription": has_active_subscription,
     }
     return render(request, "savings_list.html", context)
 
 
 @login_required
 def savings_create(request):
+    # Проверяем подписку напрямую
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
+
     if request.method == "POST":
         form = SavingGoalForm(request.POST)
         if form.is_valid():
@@ -489,9 +722,202 @@ def savings_create(request):
     else:
         form = SavingGoalForm(initial={"current_amount": 0})
 
-    return render(request, "savings_form.html", {"form": form, "mode": "create"})
+    return render(
+        request,
+        "savings_form.html",
+        {"form": form, "mode": "create", "has_active_subscription": has_active_subscription},
+    )
 
 
+@login_required
+def savings_update(request, pk):
+    # Проверяем подписку напрямую
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
+
+    goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        form = SavingGoalForm(request.POST, instance=goal)
+        if form.is_valid():
+            form.save()
+            return redirect("savings_list")
+    else:
+        form = SavingGoalForm(instance=goal)
+
+    return render(
+        request,
+        "savings_form.html",
+        {"form": form, "mode": "edit", "goal": goal, "has_active_subscription": has_active_subscription},
+    )
+
+
+@login_required
+def savings_delete(request, pk):
+    # Проверяем подписку напрямую (если нужно для логики)
+    try:
+        subscription = UserSubscription.objects.get(user=request.user)
+        has_active_subscription = subscription.is_active
+    except UserSubscription.DoesNotExist:
+        has_active_subscription = False
+
+    goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        goal.delete()
+        return redirect("savings_list")
+
+    return redirect("savings_list")
+
+@login_required
+def dashboard_expenses_by_day_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Требуется авторизация"}, status=401)
+
+    # Получаем расходы пользователя
+    expenses = Expense.objects.filter(user=request.user)
+
+    # Определяем start_date как начало текущей недели (понедельник)
+    start_date = timezone.now().date() - timedelta(days=timezone.now().weekday())  # Начало недели (понедельник)
+
+    # Создаем словарь с днями недели (7 дней начиная с понедельника)
+    day_data = {(start_date + timedelta(days=i)): 0 for i in range(7)}
+
+    # Заполняем массив с суммами по дням недели
+    for expense in expenses:
+        # Используем метод weekday() для получения дня недели (Пн=0, Вт=1, Ср=2 и т.д.)
+        day_of_week = expense.date.weekday()  # 0 - Понедельник, 6 - Воскресенье
+        day_data[start_date + timedelta(days=day_of_week)] += float(expense.amount)
+
+    # Подготавливаем данные для JSON ответа
+    days_of_week = [start_date + timedelta(days=i) for i in range(7)]  # Список дней недели
+    amounts = [day_data[day] for day in days_of_week]
+
+    return JsonResponse({
+        "days": [day.strftime('%A') for day in days_of_week],  # Форматируем дни недели как полные названия (например, "Понедельник")
+        "amounts": amounts
+    })
+
+
+@login_required
+def dashboard_expenses_by_category_pie_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    today = timezone.now().date()
+    first_day_of_month = today.replace(day=1)
+
+    expenses = Expense.objects.filter(
+        user=request.user,
+        date__gte=first_day_of_month
+    ).values('category__expenseName') \
+     .annotate(total=Sum('amount')) \
+     .order_by('-total')
+
+    categories = []
+    amounts = []
+    other_amount = 0.0
+    total = 0.0
+
+    for item in expenses:
+        amount = float(item['total'] or 0)
+        total += amount
+
+    for item in expenses:
+        name = item['category__expenseName'] or "Без категории"
+        amount = float(item['total'] or 0)
+        if total > 0 and (amount / total) < 0.03:
+            other_amount += amount
+        else:
+            categories.append(name)
+            amounts.append(amount)
+
+    if other_amount > 0:
+        categories.append("Другое")
+        amounts.append(other_amount)
+
+    if total == 0:
+        categories = ["Нет расходов"]
+        amounts = [1]
+
+    return JsonResponse({
+        "categories": categories,
+        "amounts": amounts
+    })
+
+
+# 3. Доходы по дням (последние 7 дней)
+@login_required
+def dashboard_income_by_day_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    # Получаем доходы пользователя
+    incomes = Income.objects.filter(user=request.user)
+
+    # Составляем список дней недели (Пн, Вт, Ср, Чт, Пт, Сб, Вс)
+    days_of_week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+    amounts = [0] * 7  # 7 дней недели, начинаем с нулей
+
+    # Заполняем массив с суммами по дням недели
+    for income in incomes:
+        # Используем метод weekday() для получения дня недели (Пн=0, Вт=1, Ср=2 и т.д.)
+        day_of_week = income.date.weekday()  # 0 - Понедельник, 6 - Воскресенье
+        amounts[day_of_week] += float(income.amount)
+
+    return JsonResponse({
+        "days": days_of_week,
+        "amounts": amounts
+    })
+
+@login_required
+def dashboard_income_by_category_pie_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    today = timezone.now().date()
+    first_day_of_month = today.replace(day=1)
+
+    incomes = Income.objects.filter(
+        user=request.user,
+        date__gte=first_day_of_month
+    ).values('category__incomeName') \
+     .annotate(total=Sum('amount')) \
+     .order_by('-total')
+
+    categories = []
+    amounts = []
+    other_amount = 0.0
+    total = 0.0
+
+    for item in incomes:
+        amount = float(item['total'] or 0)
+        total += amount
+
+    for item in incomes:
+        name = item['category__incomeName'] or "Без категории"
+        amount = float(item['total'] or 0)
+        if total > 0 and (amount / total) < 0.03:
+            other_amount += amount
+        else:
+            categories.append(name)
+            amounts.append(amount)
+
+    if other_amount > 0:
+        categories.append("Другое")
+        amounts.append(other_amount)
+
+    if total == 0:
+        categories = ["Нет доходов за месяц"]
+        amounts = [1]
+
+    return JsonResponse({
+        "categories": categories,
+        "amounts": amounts
+    })
 @login_required
 def savings_update(request, pk):
     goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
@@ -499,22 +925,413 @@ def savings_update(request, pk):
     if request.method == "POST":
         form = SavingGoalForm(request.POST, instance=goal)
         if form.is_valid():
-            form.save()  # после сохранения, если current_amount >= target_amount,
-                         # цель автоматически уйдёт в блок "Уже накоплено"
+            goal = form.save(commit=False)
+
+            # Рассчитываем разницу между старой и новой суммой
+            added_amount = goal.current_amount - goal._state.fields_cache.get('current_amount', 0)
+
+            # Если сумма была добавлена, создаем расход
+            if added_amount > 0:
+                # Исправление: используем 'expenseName' вместо 'name'
+                expense_category = ExpenseCategory.objects.get(expenseName="Накопление")  # Исправлено на expenseName
+
+                # Создаем новый расход
+                Expense.objects.create(
+                    user=request.user,
+                    category=expense_category,
+                    amount=added_amount,
+                    date=timezone.now(),
+                    note="Пополнение цели накопления"
+                )
+
+            goal.save()
             return redirect("savings_list")
     else:
         form = SavingGoalForm(instance=goal)
 
-    return render(request, "savings_form.html", {"form": form, "mode": "edit", "goal": goal})
+    return render(
+        request,
+        "savings_form.html",
+        {"form": form, "mode": "edit", "goal": goal}
+    )
 
 
 @login_required
-def savings_delete(request, pk):
+def add_amount_to_savings(request, pk):
+    # Получаем цель накопления
     goal = get_object_or_404(SavingGoal, pk=pk, user=request.user)
 
-    if request.method == "POST":
-        goal.delete()
+    # Проверяем, если цель уже достигнута
+    if goal.current_amount >= goal.target_amount:
+        messages.error(request, "❌ Цель уже достигнута. Невозможно добавить больше средств.")
         return redirect("savings_list")
 
-    # можно сделать простое подтверждение, но чаще всего вызывают сразу POST
-    return redirect("savings_list")
+    if request.method == "POST":
+        form = AddAmountForm(request.POST)
+        if form.is_valid():
+            # Получаем сумму для добавления
+            amount_to_add = form.cleaned_data['amount_to_add']
+
+            # Проверяем, чтобы сумма не превышала целевую сумму
+            if goal.current_amount + amount_to_add > goal.target_amount:
+                messages.error(request, f"❌ Вы не можете добавить более {goal.target_amount - goal.current_amount} KGS.")
+                return redirect("savings_list")
+
+            # Добавляем сумму к текущей
+            goal.current_amount += amount_to_add
+            goal.save()
+
+            # Создаем новый расход
+            try:
+                expense_category = ExpenseCategory.objects.get(expenseName="Накопление")
+
+                Expense.objects.create(
+                    user=request.user,
+                    category=expense_category,
+                    amount=amount_to_add,
+                    date=timezone.now(),
+                    note="Пополнение цели накопления"
+                )
+                messages.success(request, f"✅ Сумма {amount_to_add} успешно добавлена в копилку.")
+            except ExpenseCategory.DoesNotExist:
+                messages.error(request, "❌ Ошибка: Категория 'Накопление' не найдена.")
+
+            return redirect("savings_list")  # Перенаправление на страницу списка копилок
+    else:
+        form = AddAmountForm()
+
+    return render(request, "add_amount_to_savings.html", {
+        "form": form,
+        "goal": goal
+    })
+
+@login_required
+def data_for_analysis(request):
+    user = request.user
+
+    # Извлечение данных о доходах
+    incomes = Income.objects.filter(user=user).values('date', 'amount', 'category__incomeName')
+    expenses = Expense.objects.filter(user=user).values('date', 'amount', 'category__expenseName')
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(incomes)
+    expense_df = pd.DataFrame(expenses)
+
+    # Преобразуем столбец 'date' в формат datetime
+    income_df['date'] = pd.to_datetime(income_df['date'])
+    expense_df['date'] = pd.to_datetime(expense_df['date'])
+
+    # Передаем данные в шаблон
+    context = {
+        'income_data': income_df.to_dict(orient='records'),  # Преобразуем в формат для шаблона
+        'expense_data': expense_df.to_dict(orient='records'),
+    }
+    return render(request, 'data_for_analysis.html', context)
+
+@login_required
+def income_forecast_view(request):
+    user = request.user
+
+    # Извлекаем данные о доходах
+    incomes = Income.objects.filter(user=user).values('date', 'amount')
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(incomes)
+
+    # Преобразуем столбец 'date' в формат datetime
+    income_df['date'] = pd.to_datetime(income_df['date'], errors='coerce')
+
+    # Убираем строки с пустыми значениями
+    income_df = income_df.dropna(subset=['amount', 'date'])
+
+    # Фильтруем выбросы (доходы больше 15000)
+    income_df = income_df[income_df['amount'] >= 19000]
+
+    # Проверяем на наличие NaN значений
+    if income_df.isnull().values.any():
+        print("В данных есть NaN значения!")
+        return render(request, 'error.html', {'message': 'В данных есть пустые значения. Пожалуйста, проверьте данные.'})
+
+    # Проверяем, что данных достаточно для обучения модели
+    if len(income_df) < 2:
+        return render(request, 'error.html', {'message': 'Недостаточно данных для прогнозирования. Требуется минимум 2 записи.'})
+
+    # Логарифмируем данные, чтобы уменьшить влияние больших выбросов
+    income_df['amount'] = income_df['amount'].astype(float)  # Преобразуем в float
+    income_df['amount'] = np.log1p(income_df['amount'])  # log1p для того, чтобы обрабатывать 0 или маленькие значения
+
+    # Преобразуем столбец даты в числовой формат (месяц в числовое значение)
+    income_df['month'] = income_df['date'].dt.to_period('M').astype(int)  # Преобразуем период в числовое значение
+
+    # Независимая переменная (месяц)
+    X = income_df[['month']]
+    # Зависимая переменная (сумма доходов)
+    y = income_df['amount']
+
+    # Инициализация и обучение модели линейной регрессии
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Прогнозируем на следующий месяц (30 дней)
+    next_month = np.array([[income_df['month'].max() + 1]])  # Прогнозируем через 1 месяц
+    forecast_month = model.predict(next_month)
+
+    # Декодируем логарифмированные данные обратно в обычные значения
+    forecast_month_value = np.expm1(forecast_month[0])  # Возвращаем значение после логарифма
+
+    # Создаем контекст с прогнозами
+    context = {
+        'forecast_month': forecast_month_value,
+    }
+
+    return render(request, 'income_forecast.html', context)
+
+
+@login_required
+def expense_forecast_view(request):
+    user = request.user
+
+    # Извлекаем данные о расходах
+    expenses = Expense.objects.filter(user=user).values('date', 'amount')
+
+    # Преобразуем в pandas DataFrame
+    expense_df = pd.DataFrame(expenses)
+
+    # Преобразуем столбец 'date' в формат datetime
+    expense_df['date'] = pd.to_datetime(expense_df['date'], errors='coerce')
+
+    # Убираем строки с пустыми значениями
+    expense_df = expense_df.dropna(subset=['amount', 'date'])
+
+    # Фильтруем выбросы (расходы больше 15000)
+    expense_df = expense_df[expense_df['amount'] >= 1000]
+
+    # Проверяем на наличие NaN значений
+    if expense_df.isnull().values.any():
+        print("В данных есть NaN значения!")
+        return render(request, 'error.html', {'message': 'В данных есть пустые значения. Пожалуйста, проверьте данные.'})
+
+    # Проверяем, что данных достаточно для обучения модели
+    if len(expense_df) < 2:
+        return render(request, 'error.html', {'message': 'Недостаточно данных для прогнозирования. Требуется минимум 2 записи.'})
+
+    # Логарифмируем данные, чтобы уменьшить влияние больших выбросов
+    expense_df['amount'] = expense_df['amount'].astype(float)  # Преобразуем в float
+    expense_df['amount'] = np.log1p(expense_df['amount'])  # log1p для того, чтобы обрабатывать 0 или маленькие значения
+
+    # Преобразуем столбец даты в числовой формат (месяц в числовое значение)
+    expense_df['month'] = expense_df['date'].dt.to_period('M').astype(int)  # Преобразуем период в числовое значение
+
+    # Независимая переменная (месяц)
+    X = expense_df[['month']]
+    # Зависимая переменная (сумма расходов)
+    y = expense_df['amount']
+
+    # Инициализация и обучение модели линейной регрессии
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Прогнозируем на следующий месяц (30 дней)
+    next_month = np.array([[expense_df['month'].max() + 1]])  # Прогнозируем через 1 месяц
+    forecast_month = model.predict(next_month)
+
+    # Декодируем логарифмированные данные обратно в обычные значения
+    forecast_month_value = np.expm1(forecast_month[0])  # Возвращаем значение после логарифма
+
+    # Создаем контекст с прогнозами
+    context = {
+        'forecast_month': forecast_month_value,
+    }
+
+    return render(request, 'expense_forecast.html', context)
+
+
+
+@login_required
+def detect_anomalies(request):
+    user = request.user
+
+    # Извлечение данных о доходах и расходах
+    incomes = Income.objects.filter(user=user).values('amount', 'category__incomeName')
+    expenses = Expense.objects.filter(user=user).values('amount', 'category__expenseName')
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(incomes)
+    expense_df = pd.DataFrame(expenses)
+
+    # Детекция аномалий в доходах
+    iforest = IsolationForest(contamination=0.05)  # 5% аномальных данных
+    income_df['anomaly'] = iforest.fit_predict(income_df[['amount']])
+
+    # Детекция аномалий в расходах
+    expense_df['anomaly'] = iforest.fit_predict(expense_df[['amount']])
+
+    # Фильтрация аномальных транзакций
+    anomalies_income = income_df[income_df['anomaly'] == -1]
+    anomalies_expense = expense_df[expense_df['anomaly'] == -1]
+
+    # Передаем в шаблон
+    context = {
+        'anomalies_income': anomalies_income,
+        'anomalies_expense': anomalies_expense,
+    }
+
+    return render(request, 'anomalies_detected.html', context)
+
+@login_required
+def recommendations_view(request):
+    user = request.user
+
+    # Анализ доходов
+    income_categories = Income.objects.filter(user=user) \
+        .values('category__incomeName', 'date', 'amount')  # Добавляем 'date' в извлекаемые данные
+
+    # Преобразуем в pandas DataFrame
+    income_df = pd.DataFrame(income_categories)
+
+    # Проверим структуру данных
+    print(income_df.head())  # Для диагностики структуры
+
+    # Преобразуем столбец 'date' в формат datetime
+    income_df['date'] = pd.to_datetime(income_df['date'], errors='coerce')
+
+    # Убираем строки с пустыми значениями
+    income_df = income_df.dropna(subset=['amount', 'date'])
+
+    # Фильтруем выбросы (доходы больше 15000)
+    income_df = income_df[income_df['amount'] >= 15000]
+
+    # Проверяем на наличие NaN значений
+    if income_df.isnull().values.any():
+        print("В данных есть NaN значения!")
+        return render(request, 'error.html', {'message': 'В данных есть пустые значения. Пожалуйста, проверьте данные.'})
+
+    # Проверяем, что данных достаточно для обучения модели
+    if len(income_df) < 2:
+        return render(request, 'error.html', {'message': 'Недостаточно данных для прогнозирования. Требуется минимум 2 записи.'})
+
+    # Логарифмируем данные, чтобы уменьшить влияние больших выбросов
+    income_df['amount'] = income_df['amount'].astype(float)  # Преобразуем в float
+    income_df['amount'] = np.log1p(income_df['amount'])  # log1p для того, чтобы обрабатывать 0 или маленькие значения
+
+    # Преобразуем столбец даты в числовой формат (месяц в числовое значение)
+    income_df['month'] = income_df['date'].dt.to_period('M').astype(int)  # Преобразуем период в числовое значение
+
+    # Независимая переменная (месяц)
+    X = income_df[['month']]
+    # Зависимая переменная (сумма доходов)
+    y = income_df['amount']
+
+    # Инициализация и обучение модели линейной регрессии
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Прогнозируем на следующий месяц (30 дней)
+    next_month = np.array([[income_df['month'].max() + 1]])  # Прогнозируем через 1 месяц
+    forecast_month = model.predict(next_month)
+
+    # Декодируем логарифмированные данные обратно в обычные значения
+    forecast_month_value = np.expm1(forecast_month[0])  # Возвращаем значение после логарифма
+
+    # Создаем рекомендации
+    expense_categories = Expense.objects.filter(user=user) \
+        .values('category__expenseName', 'amount')  # Добавляем поле для расходов
+
+    expense_df = pd.DataFrame(expense_categories)
+    expense_df['amount'] = expense_df['amount'].astype(float)  # Преобразуем в float
+    high_expense_categories = expense_df[expense_df['amount'] >= 15000]
+
+    expense_recommendations = []
+    for category in high_expense_categories['category__expenseName']:
+        expense_recommendations.append(f"Рекомендуется сократить расходы в категории {category}.")
+
+    # Даем рекомендации по доходам
+    low_income_categories = income_df[income_df['amount'] < income_df['amount'].quantile(0.25)]
+    income_recommendations = []
+    for category in low_income_categories['category__incomeName']:
+        income_recommendations.append(f"Рекомендуется повысить доходы в категории {category}.")
+
+    context = {
+        'forecast_month': forecast_month_value,
+        'expense_recommendations': expense_recommendations,
+        'income_recommendations': income_recommendations,
+    }
+
+    return render(request, 'recommendations.html', context)
+
+
+def all_in_one_view(request):
+    user = request.user
+
+    # Извлекаем и обрабатываем данные о доходах
+    income_categories = Income.objects.filter(user=user).values('category__incomeName', 'date', 'amount')
+    income_df = pd.DataFrame(income_categories)
+
+    # Проверка структуры данных
+    income_df['date'] = pd.to_datetime(income_df['date'], errors='coerce')
+    income_df = income_df.dropna(subset=['amount', 'date'])
+    income_df = income_df[income_df['amount'] >= 15000]
+    income_df['amount'] = income_df['amount'].astype(float)
+    income_df['amount'] = np.log1p(income_df['amount'])
+    income_df['month'] = income_df['date'].dt.to_period('M').astype(int)
+
+    # Прогнозирование доходов на следующий месяц
+    X = income_df[['month']]
+    y = income_df['amount']
+    model = LinearRegression()
+    model.fit(X, y)
+    next_month = np.array([[income_df['month'].max() + 1]])
+    forecast_month = model.predict(next_month)
+    forecast_month_value = np.expm1(forecast_month[0])
+
+    # Рекомендации по доходам
+    low_income_categories = income_df[income_df['amount'] < income_df['amount'].quantile(0.25)]
+    income_recommendations = [f"Рекомендуется повысить доходы в категории {category}" for category in low_income_categories['category__incomeName']]
+
+    # Извлекаем и обрабатываем данные о расходах
+    expense_categories = Expense.objects.filter(user=user).values('category__expenseName', 'date', 'amount')
+    expense_df = pd.DataFrame(expense_categories)
+
+    expense_df['date'] = pd.to_datetime(expense_df['date'], errors='coerce')
+    expense_df = expense_df.dropna(subset=['amount', 'date'])
+    expense_df = expense_df[expense_df['amount'] >= 15000]
+    expense_df['amount'] = expense_df['amount'].astype(float)
+    expense_df['amount'] = np.log1p(expense_df['amount'])
+    expense_df['month'] = expense_df['date'].dt.to_period('M').astype(int)
+
+    # Прогнозирование расходов на следующий месяц
+    X_expense = expense_df[['month']]
+    y_expense = expense_df['amount']
+    model_expense = LinearRegression()
+    model_expense.fit(X_expense, y_expense)
+    next_month_expense = np.array([[expense_df['month'].max() + 1]])
+    forecast_month_expense = model_expense.predict(next_month_expense)
+    forecast_month_value_expense = np.expm1(forecast_month_expense[0])
+
+    # Рекомендации по расходам
+    high_expense_categories = expense_df[expense_df['amount'] >= 15000]
+    expense_recommendations = [f"Рекомендуется сократить расходы в категории {category}" for category in high_expense_categories['category__expenseName']]
+
+    # Анализ трендов (для доходов и расходов)
+    trend_recommendations = []
+
+    total_income = float(income_df['amount'].sum())
+    predicted_income = model.predict([[income_df['month'].max() + 1]])
+    if predicted_income[0] < total_income * 0.95:
+        trend_recommendations.append("Прогнозируется снижение доходов в следующем месяце. Рекомендуется рассмотреть увеличение источников дохода.")
+
+    total_expense = float(expense_df['amount'].sum())
+    predicted_expense = model_expense.predict([[expense_df['month'].max() + 1]])
+    if predicted_expense[0] > total_expense * 1.05:
+        trend_recommendations.append("Прогнозируется увеличение расходов в следующем месяце. Рекомендуется пересмотреть большие расходы.")
+
+    # Контекст для передачи в шаблон
+    context = {
+        'forecast_month': forecast_month_value,
+        'forecast_month_expense': forecast_month_value_expense,
+        'income_recommendations': income_recommendations,
+        'expense_recommendations': expense_recommendations,
+        'trend_recommendations': trend_recommendations,
+    }
+
+    return render(request, 'all_in_one.html', context)

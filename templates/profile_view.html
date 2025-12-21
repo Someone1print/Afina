@@ -2,14 +2,54 @@
 {% load static %}
 
 {% block title %}Профиль — AFINA{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'Style/Profile.css' %}">
+<style>
+    .subscription-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .subscription-active {
+        background-color: #22c55e;
+        color: white;
+    }
+
+    .subscription-canceling {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .subscription-inactive {
+        background-color: #f87171;
+        color: white;
+    }
+
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <section class="p-card">
   <div class="p-head">
-    <div class="p-avatar">{{ request.user.username|first|upper }}</div>
+    <div class="p-avatar">
+      {% if profile.profile_picture %}
+        <!-- Если фото профиля есть, показываем его -->
+        <img src="{{ profile.profile_picture.url }}" alt="Фото профиля" class="profile-picture">
+      {% else %}
+        <!-- Если фото нет, показываем инициалы пользователя -->
+        {{ request.user.username|first|upper }}
+      {% endif %}
+    </div>
     <div>
       <h1>Профиль</h1>
       <p class="p-sub">Вы вошли как <strong>{{ request.user.username }}</strong></p>
@@ -29,12 +69,55 @@
 
     <div class="p-item">
       <div class="p-key">Валюта по умолчанию</div>
-      <div class="p-val"><span class="p-badge">{{ profile.currency }}</span></div>
+      <div class="p-val">
+        <span class="p-badge">{{ profile.currency }}</span>
+      </div>
+    </div>
+
+    <!-- Секция подписки -->
+    <div class="p-item">
+      <div class="p-key">Статус подписки:</div>
+      <div class="p-val">
+        {% if subscription and subscription.cancel_at_period_end %}
+          <span class="subscription-status subscription-canceling">
+            Активна до {{ subscription.current_period_end|date:"d.m.Y" }} (отменяется)
+          </span>
+        {% elif has_active_subscription %}
+          <span class="subscription-status subscription-active">
+            Активна
+          </span>
+          <br>
+          <small class="text-muted">Действует до: {{ subscription.current_period_end|date:"d.m.Y" }}</small>
+        {% else %}
+          <span class="subscription-status subscription-inactive">
+            Неактивна
+          </span>
+          <br>
+          <small class="text-muted">
+            <a href="{% url 'stripe_test' %}" class="text-primary">Оформить подписку</a>
+          </small>
+        {% endif %}
+      </div>
     </div>
   </div>
 
+  <!-- Кнопки действий -->
   <div class="p-actions">
-    <a href="{% url 'profile_edit' %}" class="btn btn-primary">Редактировать</a>
+    <a href="{% url 'profile_edit' %}" class="btn btn-primary">Редактировать профиль</a>
+
+    {% if has_active_subscription and not subscription.cancel_at_period_end %}
+      <a href="{% url 'cancel_subscription' %}" class="btn btn-danger">
+        Отменить подписку
+      </a>
+    {% elif subscription and subscription.cancel_at_period_end %}
+      <button class="btn btn-secondary" disabled>
+        Подписка отменяется
+      </button>
+      <small class="d-block mt-2 text-muted">
+        Доступ активен до {{ subscription.current_period_end|date:"d.m.Y" }}
+      </small>
+    {% endif %}
   </div>
+
 </section>
 {% endblock %}

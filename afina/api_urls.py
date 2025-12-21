@@ -4,6 +4,12 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Импортируем ВСЁ нужное из api_views.py
 from .api_views import *
+from .views import (
+    dashboard_expenses_by_day_api,
+    dashboard_expenses_by_category_pie_api,
+    dashboard_income_by_day_api,
+    dashboard_income_by_category_pie_api,
+)
 
 # Роутер для REST API
 router = DefaultRouter()

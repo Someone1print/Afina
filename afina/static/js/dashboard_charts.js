@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 textinfo: 'label+percent',
                 textposition: 'outside',
                 marker: {
-                    colors: ['#e91e63','#1976d2','#ffb300','#43a047','#7b1fa2','#ff6f00','#d81b60','#546e7a'],
+                    colors: ['#e91e63', '#1976d2', '#ffb300', '#43a047', '#7b1fa2', '#ff6f00', '#d81b60', '#546e7a'],
                     line: { color: '#fff', width: 4 }
                 },
                 hovertemplate:
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 type: 'pie',
                 textinfo: 'label+percent',
                 marker: {
-                    colors: ['#43a047','#2e7d32','#66bb6a','#81c784','#a5d6a7'],
+                    colors: ['#43a047', '#2e7d32', '#66bb6a', '#81c784', '#a5d6a7'],
                     line: { color: '#fff', width: 4 }
                 },
                 hovertemplate:

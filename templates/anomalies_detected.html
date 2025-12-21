@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Аномалии в транзакциях</title>
+</head>
+<body>
+    <h1>Аномалии в доходах</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in anomalies_income %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.category__incomeName }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Аномалии в расходах</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in anomalies_expense %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.category__expenseName }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

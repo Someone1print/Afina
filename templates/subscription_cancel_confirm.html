@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Отмена подписки — AFINA{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Style/General.css' %}">
+<style>
+    .cancel-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        color: #333; /* Темный текст для контейнера */
+    }
+
+    .warning-icon {
+        font-size: 3rem;
+        color: #f59e0b;
+        margin-bottom: 1rem;
+    }
+
+    .subscription-details {
+        background: #f8f9fa; /* Светлый фон вместо темного */
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        color: #212529; /* Темный текст */
+    }
+
+    .subscription-details h5 {
+        color: #212529; /* Темный заголовок */
+        margin-bottom: 1rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #dee2e6; /* Более светлая граница */
+        color: #495057; /* Темный текст для строк */
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row span:first-child {
+        color: #6c757d; /* Серый цвет для меток */
+    }
+
+    .detail-row span:last-child {
+        font-weight: 500;
+        color: #212529; /* Темный цвет для значений */
+    }
+
+    .consequences {
+        background: #fff3cd; /* Светло-желтый фон */
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        color: #856404; /* Темно-желтый текст */
+    }
+
+    .consequences h6 {
+        color: #856404;
+        font-weight: 600;
+    }
+
+    .consequences ul {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+
+    .consequences li {
+        margin-bottom: 0.5rem;
+        color: #856404;
+    }
+
+    .btn-cancel {
+        background: #dc2626;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .btn-cancel:hover {
+        background: #b91c1c;
+        color: white;
+    }
+
+    .btn-back {
+        background: #6c757d; /* Серый цвет */
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+    }
+
+    .form-check-label {
+        color: #495057; /* Темный текст для чекбокса */
+        line-height: 1.5;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+
+    .text-success {
+        color: #28a745 !important; /* Зеленый цвет для статуса */
+    }
+
+    .text-primary {
+        color: #007bff !important; /* Синий цвет */
+    }
+
+    /* Общие стили для темного текста */
+    h2, h4, h5, h6 {
+        color: #212529;
+    }
+
+    p {
+        color: #495057;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cancel-container">
+    <div class="text-center warning-icon">⚠️</div>
+    <h2 class="text-center mb-4">Отмена подписки</h2>
+
+    <div class="alert alert-warning">
+        <h4>Вы уверены, что хотите отменить подписку?</h4>
+        <p class="mb-0">Вы потеряете доступ к премиум-функциям после окончания текущего периода.</p>
+    </div>
+
+    <div class="subscription-details">
+        <h5>Детали подписки:</h5>
+        <div class="detail-row">
+            <span>Статус:</span>
+            <span class="fw-bold text-success">Активна</span>
+        </div>
+        <div class="detail-row">
+            <span>Дата начала периода:</span>
+            <span>{{ subscription.current_period_start|date:"d.m.Y" }}</span>
+        </div>
+        <div class="detail-row">
+            <span>Дата окончания периода:</span>
+            <span class="fw-bold">{{ subscription.current_period_end|date:"d.m.Y H:i" }}</span>
+        </div>
+        <div class="detail-row">
+            <span>Доступ до:</span>
+            <span class="fw-bold text-primary">{{ subscription.current_period_end|date:"d.m.Y H:i" }}</span>
+        </div>
+    </div>
+
+    <div class="consequences">
+        <h6>Что произойдет после отмены:</h6>
+        <ul class="mb-0">
+            <li>✅ Вы сохраните доступ к премиум-функциям до <strong>{{ subscription.current_period_end|date:"d.m.Y" }}</strong></li>
+            <li>❌ Автопродление будет отключено</li>
+            <li>📊 Статистика и данные сохранятся</li>
+            <li>🔄 Вы сможете возобновить подписку в любой момент</li>
+            <li>💳 С вашей карты больше не будут списываться средства</li>
+        </ul>
+    </div>
+
+    <form method="post" action="{% url 'cancel_subscription_confirm' %}">
+        {% csrf_token %}
+
+        <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="confirmCancel" required>
+            <label class="form-check-label" for="confirmCancel">
+                Я понимаю, что подписка будет активна до конца текущего периода,
+                а затем будет отменена без возможности автоматического продления.
+            </label>
+        </div>
+
+        <div class="d-flex gap-3">
+            <a href="{% url 'profile_view' %}" class="btn btn-back flex-grow-1">
+                ← Вернуться в профиль
+            </a>
+            <button type="submit" class="btn btn-cancel flex-grow-1" id="cancelBtn" disabled>
+                Отменить подписку
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Активируем кнопку только после подтверждения
+    document.getElementById('confirmCancel').addEventListener('change', function() {
+        document.getElementById('cancelBtn').disabled = !this.checked;
+    });
+
+    // Подтверждение при нажатии
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!confirm('Вы точно хотите отменить подписку? Это действие нельзя отменить.')) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}
