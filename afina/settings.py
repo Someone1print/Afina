@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 # AMan
 # SECURITY WARNING: keep the secret key used in production secret!
-***REMOVED***
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h]
 
 
 # Application definition
@@ -154,7 +154,7 @@ SPECTACULAR_SETTINGS = {
     'SECURITY': [{'BearerAuth': []}],
 }
 
-***REMOVED***
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', 'pk_test_51SXGylHDyrxMN0Jp6uWRtENXFElU8hdTjs146Wp752MChsWIxCoCYFGEHBAshvf8rjE1dGPHLcBWjFXBxmmo0N4A00nWRZLHtR')
 STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_1SXHX8HDyrxMN0JpIklIongA')
 #STRIPE_WEBHOOK_SECRET = 'whsec_xxx'  # Получите из панели Stripe
